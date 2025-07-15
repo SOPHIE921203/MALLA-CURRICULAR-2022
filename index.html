@@ -1,106 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malla Curricular de Arquitectura</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malla Curricular de Arquitectura</title>
+<style>
+body {
+    font-family: sans-serif;
+    background: #f0f4fa;
+    color: #333;
+    text-align: center;
+    padding: 20px;
+}
+.semestre {
+    background: #e0ebf7;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 12px;
+    display: inline-block;
+    width: 280px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.semestre h2 {
+    color: #2b4c7e;
+}
+.semestre ul {
+    list-style: none;
+    padding: 0;
+}
+.semestre li {
+    margin: 8px 0;
+}
+.curso {
+    background: #ffffff;
+    color: #2b4c7e;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: block;
+    margin: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.2s;
+}
+.curso:hover {
+    background: #cfdff0;
+    transform: translateY(-2px);
+}
+.completado {
+    background: #8ecae6 !important;
+    color: white !important;
+    font-weight: bold;
+}
+.credito {
+    background: #ff7b89;
+    color: white;
+}
+.credito:hover {
+    background: #e85c70;
+}
+</style>
 </head>
 <body>
-    <h1>Malla Curricular de Arquitectura</h1>
-    <p>Haz clic en cada curso para marcarlo como completado. Si un curso tiene prerequisito, no podrás marcarlo hasta completarlo.</p>
-    <div class="grid">
-        <div class="semestre">
-            <h2>Semestre 1</h2>
-            <ul>
-                <li><a href="#" data-curso="acond1">Acondicionamiento Ambiental I</a></li>
-                <li><a href="#">Introducción a la Arquitectura</a></li>
-                <li><a href="#">Matemáticas</a></li>
-            </ul>
-        </div>
-        <div class="semestre">
-            <h2>Semestre 2</h2>
-            <ul>
-                <li><a href="#" data-curso="acond2" data-prereq="acond1">Acondicionamiento Ambiental II</a></li>
-                <li><a href="#">Historia de la Arquitectura</a></li>
-                <li><a href="#">Geometría Descriptiva</a></li>
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        document.querySelectorAll('.semestre a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const prereq = this.dataset.prereq;
-                if (prereq) {
-                    const prereqLink = document.querySelector(`[data-curso="${prereq}"]`);
-                    if (!prereqLink.classList.contains('completado')) {
-                        alert('Debes completar primero el curso prerequisito antes de marcar este.');
-                        return;
-                    }
+<h1>🌸 Malla Curricular de Arquitectura 🌸</h1>
+<p>Haz clic para marcar como completado. Cursos que requieren créditos aparecen en <span style="color:#e85c70;font-weight:bold;">rosado</span>.</p>
+<div id="malla"></div>
+<script>
+const cursos = [
+    {semestre:1, nombre:'MATEMATICA'},
+    {semestre:1, nombre:'IDENTIDAD Y PERUANIDAD'},
+    {semestre:1, nombre:'PROPEDEUTICA PARA LA INVESTIGACION', id:'propinvest'},
+    {semestre:1, nombre:'PROYECTOS 1: EL ESPACIO CORPORAL', id:'proy1'},
+    {semestre:1, nombre:'REPRESENTACION 1: PENSAMIENTO Y REALIDAD', id:'rep1'},
+    {semestre:1, nombre:'TALLER DE ARTES'},
+    {semestre:2, nombre:'CALCULO'},
+    {semestre:2, nombre:'PROYECTOS II: EL ESPACIO ARQUITECTONICO', id:'proy2', prereq:'proy1'},
+    {semestre:2, nombre:'REPRESENTACION II: EL PROCESO PROYECTUAL', id:'rep2', prereq:'rep1'},
+    {semestre:2, nombre:'TALLER DE ARGUMENTACION'},
+    {semestre:2, nombre:'TALLER DE DEPORTES'},
+    {semestre:2, nombre:'TEORIA E HISTORIA CRITICA DE LA ARQUITECTURA I', id:'thca1', prereq:'propinvest'},
+    // Agrega los demás cursos de forma equivalente, con "id" y "prereq" donde corresponda
+    {semestre:5, nombre:'ARQUITECTURA Y CINE', creditos:true},
+    {semestre:5, nombre:'DISEÑO DE INTERIORES', creditos:true},
+    {semestre:5, nombre:'ARQUITECTURA PERUANA Y LATINOAMERICANA', creditos:true},
+    {semestre:6, nombre:'ARQUITECTURA CONTEMPORÁNEA', creditos:true},
+    {semestre:6, nombre:'DISEÑO DE ARQUITECTURA COMERCIAL', creditos:true},
+    {semestre:6, nombre:'REDACCIÓN CIENTÍFICA Y PUBLICACIÓN DE ARTÍCULOS', creditos:true},
+    {semestre:7, nombre:'ARQUITECTURA Y URBANISMO CON ENFOQUE DE GÉNERO', creditos:true},
+    {semestre:7, nombre:'LEAN CONSTRUCTION', creditos:true},
+    {semestre:7, nombre:'URBANISMO E INVESTIGACIÓN', creditos:true},
+    {semestre:8, nombre:'BIM & MANAGEMENT', creditos:true},
+    {semestre:8, nombre:'DISEÑO PARAMÉTRICO', creditos:true},
+    {semestre:8, nombre:'PLANEAMIENTO ESTRATÉGICO', creditos:true},
+    {semestre:9, nombre:'ANTROPOLOGÍA DE LA CULTURA CHICHA PERUANA', creditos:true},
+    {semestre:9, nombre:'LUMINOTECNIA Y ACÚSTICA', creditos:true},
+    {semestre:9, nombre:'RESTAURACIÓN Y PATOLOGÍAS EN EDIFICACIONES', creditos:true},
+];
+const container = document.getElementById('malla');
+for(let s=1;s<=11;s++){
+    const div=document.createElement('div');
+    div.className='semestre';
+    const h=document.createElement('h2');
+    h.textContent=`Semestre ${s}`;
+    div.appendChild(h);
+    const ul=document.createElement('ul');
+    cursos.filter(c=>c.semestre===s).forEach(curso=>{
+        const li=document.createElement('li');
+        const a=document.createElement('a');
+        a.textContent=curso.nombre;
+        a.href='#';
+        a.className='curso';
+        if(curso.creditos) a.classList.add('credito');
+        if(curso.id) a.dataset.curso=curso.id;
+        if(curso.prereq) a.dataset.prereq=curso.prereq;
+        a.addEventListener('click',function(e){
+            e.preventDefault();
+            if(curso.prereq){
+                const prereq=document.querySelector(`[data-curso='${curso.prereq}']`);
+                if(!prereq.classList.contains('completado')){
+                    alert('Debes completar primero el curso prerequisito');
+                    return;
                 }
-                this.classList.toggle('completado');
-            });
+            }
+            a.classList.toggle('completado');
         });
-    </script>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 20px;
-            background: #f5f5f5;
-            color: #333;
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .semestre {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            width: 220px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .semestre h2 {
-            font-size: 18px;
-            color: #007acc;
-        }
-
-        .semestre ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .semestre li {
-            margin: 8px 0;
-        }
-
-        .semestre a {
-            color: #007acc;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .semestre a:hover {
-            text-decoration: underline;
-        }
-
-        .completado {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
+        li.appendChild(a);
+        ul.appendChild(li);
+    });
+    div.appendChild(ul);
+    container.appendChild(div);
+}
+</script>
 </body>
 </html>
