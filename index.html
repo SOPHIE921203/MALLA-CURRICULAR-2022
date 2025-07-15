@@ -131,5 +131,65 @@ for(let s=1;s<=4;s++){
     container.appendChild(div);
 }
 </script>
+    <script>
+const cursos5y6 = [
+// Semestre 5
+{semestre:5, nombre:'ACONDICIONAMIENTO AMBIENTAL I', id:'aa1'},
+{semestre:5, nombre:'ARQUITECTURA LEGAL I'},
+{semestre:5, nombre:'ARQUITECTURA PERUANA Y LATINOAMERICANA', creditos:80},
+{semestre:5, nombre:'ARQUITECTURA Y CINE', creditos:80},
+{semestre:5, nombre:'DISEÑO DE INTERIORES', creditos:80},
+{semestre:5, nombre:'FILOSOFÍA Y ÉTICA'},
+{semestre:5, nombre:'INSTALACIONES SANITARIAS', id:'instsani', prereq:'sistemat2'},
+{semestre:5, nombre:'PROYECTOS V: SOSTENIBILIDAD Y MATERIALIDAD', id:'proy5', prereq:'proy4'},
+// Semestre 6
+{semestre:6, nombre:'ACONDICIONAMIENTO AMBIENTAL II', id:'aa2', prereq:'aa1'},
+{semestre:6, nombre:'ARQUITECTURA CONTEMPORÁNEA', creditos:100},
+{semestre:6, nombre:'ARQUITECTURA LEGAL II: EXPEDIENTES TÉCNICOS', prereq:'arqlegal1'},
+{semestre:6, nombre:'DISEÑO DE ARQUITECTURA COMERCIAL', creditos:100},
+{semestre:6, nombre:'INSTALACIONES ELECTROMECÁNICAS', prereq:'instsani'},
+{semestre:6, nombre:'METODOLOGÍA DE LA INVESTIGACIÓN', prereq:'propinvest'},
+{semestre:6, nombre:'PROYECTOS VI: ARQUITECTURA Y PRE EXISTENCIAS', id:'proy6', prereq:'proy5'},
+{semestre:6, nombre:'REDACCIÓN CIENTÍFICA Y PUBLICACIÓN DE ARTÍCULOS', creditos:100},
+];
+
+cursos5y6.forEach(curso => {
+    const divId = `semestre-${curso.semestre}`;
+    let div = document.getElementById(divId);
+    if (!div) {
+        div = document.createElement('div');
+        div.className = 'semestre';
+        div.id = divId;
+        const h = document.createElement('h2');
+        h.textContent = `Semestre ${curso.semestre}`;
+        div.appendChild(h);
+        const ul = document.createElement('ul');
+        div.appendChild(ul);
+        document.getElementById('malla').appendChild(div);
+    }
+    const ul = div.querySelector('ul');
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = curso.nombre;
+    a.href = '#';
+    a.className = 'curso';
+    if (curso.creditos) a.classList.add('credito');
+    if (curso.id) a.dataset.curso = curso.id;
+    if (curso.prereq) a.dataset.prereq = curso.prereq;
+    a.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (curso.prereq) {
+            const prereq = document.querySelector(`[data-curso='${curso.prereq}']`);
+            if (!prereq || !prereq.classList.contains('completado')) {
+                alert('Debes completar primero el curso prerequisito');
+                return;
+            }
+        }
+        a.classList.toggle('completado');
+    });
+    li.appendChild(a);
+    ul.appendChild(li);
+});
+</script>
 </body>
 </html>
