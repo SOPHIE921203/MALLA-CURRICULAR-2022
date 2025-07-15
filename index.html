@@ -250,5 +250,64 @@ cursos7y8.forEach(curso => {
     ul.appendChild(li);
 });
 </script>
+    <script>
+const cursos9a11 = [
+// Semestre 9
+{semestre:9, nombre:'ANTROPOLOGÍA DE LA CULTURA CHICHA PERUANA', creditos:160},
+{semestre:9, nombre:'ESTADÍSTICA Y PROBABILIDADES'},
+{semestre:9, nombre:'LUMINOTECNIA Y ACÚSTICA', creditos:160},
+{semestre:9, nombre:'PROYECTOS IX: ARQUITECTURA, CIUDAD Y TERRITORIO', id:'proy9', prereq:'proy8'},
+{semestre:9, nombre:'RESTAURACIÓN Y PATOLOGÍAS EN EDIFICACIONES', creditos:160},
+{semestre:9, nombre:'TALLER DE INVESTIGACIÓN I', id:'tinvest1'},
+
+// Semestre 10
+{semestre:10, nombre:'GESTIÓN DE PROYECTOS'},
+{semestre:10, nombre:'PROYECTOS X: PROYECTO DE FIN DE CARRERA', id:'proy10', prereq:'proy9'},
+{semestre:10, nombre:'TALLER DE INVESTIGACIÓN II', id:'tinvest2', prereq:'tinvest1'},
+{semestre:10, nombre:'TRABAJO DE INVESTIGACIÓN'},
+
+// Semestre 11
+{semestre:11, nombre:'PRÁCTICAS PRE PROFESIONALES', prereq:'proy10'},
+{semestre:11, nombre:'SEMINARIO DE TESIS', prereq:'tinvest2'},
+];
+
+cursos9a11.forEach(curso => {
+    const divId = `semestre-${curso.semestre}`;
+    let div = document.getElementById(divId);
+    if (!div) {
+        div = document.createElement('div');
+        div.className = 'semestre';
+        div.id = divId;
+        const h = document.createElement('h2');
+        h.textContent = `Semestre ${curso.semestre}`;
+        div.appendChild(h);
+        const ul = document.createElement('ul');
+        div.appendChild(ul);
+        document.getElementById('malla').appendChild(div);
+    }
+    const ul = div.querySelector('ul');
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = curso.nombre;
+    a.href = '#';
+    a.className = 'curso';
+    if (curso.creditos) a.classList.add('credito');
+    if (curso.id) a.dataset.curso = curso.id;
+    if (curso.prereq) a.dataset.prereq = curso.prereq;
+    a.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (curso.prereq) {
+            const prereq = document.querySelector(`[data-curso='${curso.prereq}']`);
+            if (!prereq || !prereq.classList.contains('completado')) {
+                alert('Debes completar primero el curso prerequisito');
+                return;
+            }
+        }
+        a.classList.toggle('completado');
+    });
+    li.appendChild(a);
+    ul.appendChild(li);
+});
+</script>
 </body>
 </html>
