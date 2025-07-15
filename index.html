@@ -66,64 +66,27 @@ body {
 <div id="malla"></div>
 <script>
 const cursos = [
-// PARTE 1: Semestre 1 y Semestre 2
+// Semestre 1
 {semestre:1, nombre:'MATEMATICA'},
 {semestre:1, nombre:'IDENTIDAD Y PERUANIDAD'},
 {semestre:1, nombre:'PROPEDEUTICA PARA LA INVESTIGACION', id:'propinvest'},
 {semestre:1, nombre:'PROYECTOS 1: EL ESPACIO CORPORAL', id:'proy1'},
 {semestre:1, nombre:'REPRESENTACION 1: PENSAMIENTO Y REALIDAD', id:'rep1'},
 {semestre:1, nombre:'TALLER DE ARTES'},
+// Semestre 2
 {semestre:2, nombre:'CALCULO'},
 {semestre:2, nombre:'PROYECTOS II: EL ESPACIO ARQUITECTONICO', id:'proy2', prereq:'proy1'},
 {semestre:2, nombre:'REPRESENTACION II: EL PROCESO PROYECTUAL', id:'rep2', prereq:'rep1'},
 {semestre:2, nombre:'TALLER DE ARGUMENTACION'},
 {semestre:2, nombre:'TALLER DE DEPORTES'},
 {semestre:2, nombre:'TEORIA E HISTORIA CRITICA DE LA ARQUITECTURA I', id:'thca1', prereq:'propinvest'},
-];
-const container = document.getElementById('malla');
-for(let s=1;s<=2;s++){
-    const div=document.createElement('div');
-    div.className='semestre';
-    const h=document.createElement('h2');
-    h.textContent=`Semestre ${s}`;
-    div.appendChild(h);
-    const ul=document.createElement('ul');
-    cursos.filter(c=>c.semestre===s).forEach(curso=>{
-        const li=document.createElement('li');
-        const a=document.createElement('a');
-        a.textContent=curso.nombre;
-        a.href='#';
-        a.className='curso';
-        if(curso.creditos) a.classList.add('credito');
-        if(curso.id) a.dataset.curso=curso.id;
-        if(curso.prereq) a.dataset.prereq=curso.prereq;
-        a.addEventListener('click',function(e){
-            e.preventDefault();
-            if(curso.prereq){
-                const prereq=document.querySelector(`[data-curso='${curso.prereq}']`);
-                if(!prereq.classList.contains('completado')){
-                    alert('Debes completar primero el curso prerequisito');
-                    return;
-                }
-            }
-            a.classList.toggle('completado');
-        });
-        li.appendChild(a);
-        ul.appendChild(li);
-    });
-    div.appendChild(ul);
-    container.appendChild(div);
-}
-</script>
-    <script>
-const cursos = [
-// PARTE 2: Semestre 3 y Semestre 4
+// Semestre 3
 {semestre:3, nombre:'PROYECTOS III: ARQUITECTURA Y LUGAR', id:'proy3', prereq:'proy2'},
 {semestre:3, nombre:'REPRESENTACIÓN III: EL SENTIDO DE LA ARQUITECTURA', id:'rep3', prereq:'rep2'},
 {semestre:3, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES I'},
 {semestre:3, nombre:'TALLER DE LECTURA Y REDACCIÓN'},
 {semestre:3, nombre:'TEORÍA E HISTORIA CRITICA DE LA ARQUITECTURA II', id:'thca2', prereq:'thca1'},
-
+// Semestre 4
 {semestre:4, nombre:'PROYECTOS IV: HABITAR LA VIVIENDA', id:'proy4', prereq:'proy3'},
 {semestre:4, nombre:'RESPONSABILIDAD CIUDADANA Y ECOLOGIA'},
 {semestre:4, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES II', id:'sistemat2'},
@@ -132,7 +95,9 @@ const cursos = [
 {semestre:4, nombre:'TALLER DE INTELIGENCIA EMOCIONAL Y HABILIDADES SOCIALES'},
 {semestre:4, nombre:'TEORIA E HISTORIA CRITICA DE LA ARQUITECTURA III', id:'thca3', prereq:'thca2'},
 ];
-for(let s=3;s<=4;s++){
+
+const container = document.getElementById('malla');
+for(let s=1;s<=4;s++){
     const div=document.createElement('div');
     div.className='semestre';
     const h=document.createElement('h2');
@@ -163,7 +128,7 @@ for(let s=3;s<=4;s++){
         ul.appendChild(li);
     });
     div.appendChild(ul);
-    document.getElementById('malla').appendChild(div);
+    container.appendChild(div);
 }
 </script>
 </body>
