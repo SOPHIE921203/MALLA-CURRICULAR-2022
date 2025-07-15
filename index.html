@@ -191,5 +191,64 @@ cursos5y6.forEach(curso => {
     ul.appendChild(li);
 });
 </script>
+    <script>
+const cursos7y8 = [
+// Semestre 7
+{semestre:7, nombre:'ARQUITECTURA Y URBANISMO CON ENFOQUE DE GÉNERO', creditos:120},
+{semestre:7, nombre:'CONSTRUCCIÓN I', id:'const1', prereq:'instsani'},
+{semestre:7, nombre:'LEAN CONSTRUCTION', creditos:120},
+{semestre:7, nombre:'PROMOCIÓN Y EMPRENDIMIENTO DE PROYECTOS'},
+{semestre:7, nombre:'PROYECTOS VII: HABITAR, CULTURA Y ESPACIO PÚBLICO', id:'proy7', prereq:'proy6'},
+{semestre:7, nombre:'TEORÍA E HISTORIA CRITICA DEL URBANISMO I', id:'thcu1', prereq:'aa2'},
+{semestre:7, nombre:'URBANISMO E INVESTIGACIÓN', creditos:120},
+
+// Semestre 8
+{semestre:8, nombre:'BIM & MANAGEMENT', creditos:140},
+{semestre:8, nombre:'CONSTRUCCIÓN II', id:'const2', prereq:'const1'},
+{semestre:8, nombre:'DIRECCIÓN DE PROYECTOS Y OBRAS'},
+{semestre:8, nombre:'DISEÑO PARAMÉTRICO', creditos:140},
+{semestre:8, nombre:'PLANEAMIENTO ESTRATÉGICO', creditos:140},
+{semestre:8, nombre:'PROYECTOS VIII: ARQUITECTURA Y PAISAJE', id:'proy8', prereq:'proy7'},
+{semestre:8, nombre:'TEORÍA E HISTORIA CRITICA DEL URBANISMO II', id:'thcu2', prereq:'thcu1'},
+];
+
+cursos7y8.forEach(curso => {
+    const divId = `semestre-${curso.semestre}`;
+    let div = document.getElementById(divId);
+    if (!div) {
+        div = document.createElement('div');
+        div.className = 'semestre';
+        div.id = divId;
+        const h = document.createElement('h2');
+        h.textContent = `Semestre ${curso.semestre}`;
+        div.appendChild(h);
+        const ul = document.createElement('ul');
+        div.appendChild(ul);
+        document.getElementById('malla').appendChild(div);
+    }
+    const ul = div.querySelector('ul');
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = curso.nombre;
+    a.href = '#';
+    a.className = 'curso';
+    if (curso.creditos) a.classList.add('credito');
+    if (curso.id) a.dataset.curso = curso.id;
+    if (curso.prereq) a.dataset.prereq = curso.prereq;
+    a.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (curso.prereq) {
+            const prereq = document.querySelector(`[data-curso='${curso.prereq}']`);
+            if (!prereq || !prereq.classList.contains('completado')) {
+                alert('Debes completar primero el curso prerequisito');
+                return;
+            }
+        }
+        a.classList.toggle('completado');
+    });
+    li.appendChild(a);
+    ul.appendChild(li);
+});
+</script>
 </body>
 </html>
