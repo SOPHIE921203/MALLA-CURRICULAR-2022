@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malla Curricular de Arquitectura</title>
 <style>
+    #progreso-container {
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#barra-progreso {
+    width: 100%;
+    background: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 20px;
+}
+
+#barra-relleno {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f78da7, #a2d2ff);
+    transition: width 0.5s;
+}
+
     .curso.desactivado {
     color: gray;
     pointer-events: none;
@@ -68,9 +89,34 @@ body {
 </head>
 <body>
 <h1>🌸 MALLA CURRICULAR ARQUITECTURA 🌸</h1>
+    <div id="progreso-container">
+  <p id="progreso-texto">Progreso: 0% (0/0 cursos completados)</p>
+  <div id="barra-progreso">
+    <div id="barra-relleno"></div>
+  </div>
+</div>
 <p>Haz clic para marcar como completado. Los cursos que requieren créditos aparecen en rosado.</p>
 <div id="malla"></div>
 <script>
+    function actualizarProgreso() {
+    const cursosTotales = document.querySelectorAll('.curso').length;
+    const cursosCompletados = document.querySelectorAll('.curso.completado').length;
+    const porcentaje = cursosTotales ? Math.round((cursosCompletados / cursosTotales) * 100) : 0;
+
+    document.getElementById('progreso-texto').textContent =
+        `Progreso: ${porcentaje}% (${cursosCompletados}/${cursosTotales} cursos completados)`;
+
+    document.getElementById('barra-relleno').style.width = `${porcentaje}%`;
+}
+
+// Actualiza progreso al cargar
+actualizarProgreso();
+
+// Actualiza progreso cada vez que completes un curso
+document.querySelectorAll('.curso').forEach(curso => {
+    curso.addEventListener('click', actualizarProgreso);
+});
+
 const cursos = [
 // Semestre 1
 {semestre:1, nombre:'MATEMATICA'},
