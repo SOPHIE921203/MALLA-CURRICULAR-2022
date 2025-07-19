@@ -119,17 +119,29 @@ for(let s=1;s<=4;s++){
         if(curso.creditos) a.classList.add('credito');
         if(curso.id) a.dataset.curso=curso.id;
         if(curso.prereq) a.dataset.prereq=curso.prereq;
-        a.addEventListener('click',function(e){
-            e.preventDefault();
-            if(curso.prereq){
-                const prereq=document.querySelector(`[data-curso='${curso.prereq}']`);
-                if(!prereq || !prereq.classList.contains('completado')){
-                    alert('Debes completar primero el curso prerequisito');
-                    return;
-                }
+        function actualizarEstadoCursos() {
+    document.querySelectorAll('.curso').forEach(cursoEl => {
+        const prereqId = cursoEl.dataset.prereq;
+        if (prereqId) {
+            const prereq = document.querySelector(`[data-curso='${prereqId}']`);
+            if (!prereq || !prereq.classList.contains('completado')) {
+                cursoEl.classList.add('desactivado');
+            } else {
+                cursoEl.classList.remove('desactivado');
             }
-            a.classList.toggle('completado');
-        });
+        }
+    });
+}
+
+a.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (a.classList.contains('desactivado')) {
+        alert('Debes completar primero el curso prerequisito');
+        return;
+    }
+    a.classList.toggle('completado');
+    actualizarEstadoCursos();
+});
         li.appendChild(a);
         ul.appendChild(li);
     });
