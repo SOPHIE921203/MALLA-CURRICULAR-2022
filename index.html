@@ -336,20 +336,6 @@ cursos9a11.forEach(curso => {
     if (curso.creditos) a.classList.add('credito');
     if (curso.id) a.dataset.curso = curso.id;
     if (curso.prereq) a.dataset.prereq = curso.prereq;
-   function actualizarEstadoCursos() {
-    document.querySelectorAll('.curso').forEach(cursoEl => {
-        const prereqId = cursoEl.dataset.prereq;
-        if (prereqId) {
-            const prereq = document.querySelector(`[data-curso='${prereqId}']`);
-            if (!prereq || !prereq.classList.contains('completado')) {
-                cursoEl.classList.add('desactivado');
-            } else {
-                cursoEl.classList.remove('desactivado');
-            }
-        }
-    });
-}
-
 a.addEventListener('click', function (e) {
     e.preventDefault();
     if (a.classList.contains('desactivado')) {
@@ -358,6 +344,9 @@ a.addEventListener('click', function (e) {
     }
     a.classList.toggle('completado');
     actualizarEstadoCursos();
+});
+li.appendChild(a);
+ul.appendChild(li);
 });
 </script>
 </body>
