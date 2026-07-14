@@ -5,394 +5,479 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malla Curricular de Arquitectura</title>
 <style>
-    #progreso-container {
-    max-width: 400px;
-    margin: 20px auto;
-    text-align: center;
-}
+  * { box-sizing: border-box; }
 
-#barra-progreso {
-    width: 100%;
-    background: #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 20px;
-}
-
-#barra-relleno {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #f78da7, #a2d2ff);
-    transition: width 0.5s;
-}
-
-    .curso.desactivado {
-    color: gray;
-    pointer-events: none;
-    cursor: default;
-    opacity: 0.5;
-}
-body {
+  body {
     font-family: sans-serif;
     background: #f0f4fa;
     color: #333;
     text-align: center;
     padding: 20px;
-}
-.semestre {
+  }
+
+  h1 { margin-bottom: 4px; }
+
+  #resumen {
+    max-width: 620px;
+    margin: 16px auto 24px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  #resumen .fila {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 6px 0;
+    font-size: 14px;
+  }
+
+  #resumen .dato {
+    background: #e0ebf7;
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 130px;
+  }
+
+  #resumen .dato strong {
+    display: block;
+    font-size: 18px;
+    color: #2b4c7e;
+  }
+
+  #barra-progreso {
+    width: 100%;
+    background: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 18px;
+    margin-top: 10px;
+  }
+
+  #barra-relleno {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f78da7, #a2d2ff);
+    transition: width 0.5s;
+  }
+
+  #reiniciar {
+    margin-top: 10px;
+    background: #fff0f3;
+    border: 1px solid #f78da7;
+    color: #c9184a;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #reiniciar:hover { background: #ffd9e2; }
+
+  .leyenda {
+    max-width: 620px;
+    margin: 0 auto 20px;
+    font-size: 13px;
+    color: #555;
+  }
+  .leyenda span { display: inline-block; margin: 0 8px; }
+  .punto {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+  }
+
+  #malla {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .semestre {
     background: #e0ebf7;
     padding: 15px;
     margin: 10px;
     border-radius: 12px;
-    display: inline-block;
     width: 280px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.semestre h2 {
-    color: #2b4c7e;
-}
-.semestre ul {
-    list-style: none;
-    padding: 0;
-}
-.semestre li {
-    margin: 8px 0;
-}
-.curso {
+    vertical-align: top;
+  }
+
+  .semestre h2 { color: #2b4c7e; margin-top: 0; }
+
+  .semestre ul { list-style: none; padding: 0; margin: 0; }
+  .semestre li { margin: 8px 0; }
+
+  .curso {
     background: #ffffff;
     color: #2b4c7e;
+    border-radius: 8px;
     padding: 8px 10px;
-    border-radius: 6px;
-    display: block;
-    margin: 5px;
+    text-align: left;
     cursor: pointer;
-    text-decoration: none;
-    transition: background 0.3s, transform 0.2s;
-}
-.curso:hover {
-    background: #cfdff0;
-    transform: translateY(-2px);
-}
-.completado {
-    background: #8ecae6 !important;
-    color: white !important;
-    font-weight: bold;
-}
-.credito {
-    background: #ff7b89;
-    color: white;
-}
-.credito:hover {
-    background: #e85c70;
-}
+    transition: background 0.2s, transform 0.15s, opacity 0.2s;
+  }
+  .curso:hover:not(.desactivado) { background: #cfdff0; transform: translateY(-1px); }
+
+  .curso-nombre { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .curso-nombre .check {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    border: 2px solid #8ecae6;
+    flex-shrink: 0;
+  }
+
+  .curso.completado { background: #8ecae6!important; color: white!important; font-weight: bold; }
+  .curso.completado .check { background: white; border-color: white; }
+
+  .curso.electivo:not(.completado):not(.desactivado) { background: #fff0f3; }
+  .curso.electivo .curso-nombre::after {
+    content: 'electivo';
+    font-size: 9px;
+    font-weight: normal;
+    opacity: 0.6;
+    margin-left: auto;
+  }
+
+  .curso.desactivado {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .curso.desactivado .campos { display: none; }
+
+  .campos {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .campos input {
+    width: 100%;
+    font-size: 12px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    border: 1px solid #cfdff0;
+  }
+  .curso.completado .campos input { border-color: #ffffff88; }
+  .campos label {
+    font-size: 10px;
+    display: block;
+    text-align: left;
+    opacity: 0.75;
+  }
+  .campo-grupo { flex: 1; }
+
+  .curso.desactivado-prereq::before {
+    content: '🔒 requiere prerequisito';
+    display: block;
+    font-size: 10px;
+    opacity: 0.9;
+  }
+  .curso.desactivado-grupo::before {
+    content: '— elegiste otro electivo de este bloque';
+    display: block;
+    font-size: 10px;
+    opacity: 0.9;
+  }
 </style>
 </head>
 <body>
+
 <h1>🌸 MALLA CURRICULAR ARQUITECTURA 🌸</h1>
-    <div id="progreso-container">
+
+<div id="resumen">
   <p id="progreso-texto">Progreso: 0% (0/0 cursos completados)</p>
-  <div id="barra-progreso">
-    <div id="barra-relleno"></div>
+  <div id="barra-progreso"><div id="barra-relleno"></div></div>
+  <div class="fila">
+    <div class="dato"><strong id="dato-restantes">0</strong>cursos por llevar</div>
+    <div class="dato"><strong id="dato-creditos">0</strong>créditos llevados</div>
+    <div class="dato"><strong id="dato-promedio">--</strong>promedio ponderado</div>
   </div>
+  <button id="reiniciar">Reiniciar todo el progreso</button>
 </div>
-<p>Haz clic para marcar como completado. Los cursos que requieren créditos aparecen en rosado.</p>
+
+<p class="leyenda">
+  Haz clic en un curso para marcarlo como llevado. <br>
+  <span><span class="punto" style="background:#8ecae6"></span>completado</span>
+  <span><span class="punto" style="background:#fff0f3;border:1px solid #f78da7"></span>electivo (3 por semestre, elegir uno desactiva los otros)</span>
+  <span><span class="punto" style="background:#ccc"></span>bloqueado por prerequisito</span>
+</p>
+
 <div id="malla"></div>
+
 <script>
+// ---------- DATOS DE LA MALLA ----------
+// prereq: id del curso que se debe completar antes
+// grupo: id del bloque de electivos (solo puede haber uno activo por grupo)
 const cursos = [
-// Semestre 1
-{semestre:1, nombre:'MATEMATICA'},
-{semestre:1, nombre:'IDENTIDAD Y PERUANIDAD'},
-{semestre:1, nombre:'PROPEDEUTICA PARA LA INVESTIGACION', id:'propinvest'},
-{semestre:1, nombre:'PROYECTOS 1: EL ESPACIO CORPORAL', id:'proy1'},
-{semestre:1, nombre:'REPRESENTACION 1: PENSAMIENTO Y REALIDAD', id:'rep1'},
-{semestre:1, nombre:'TALLER DE ARTES'},
-// Semestre 2
-{semestre:2, nombre:'CALCULO'},
-{semestre:2, nombre:'PROYECTOS II: EL ESPACIO ARQUITECTONICO', id:'proy2', prereq:'proy1'},
-{semestre:2, nombre:'REPRESENTACION II: EL PROCESO PROYECTUAL', id:'rep2', prereq:'rep1'},
-{semestre:2, nombre:'TALLER DE ARGUMENTACION'},
-{semestre:2, nombre:'TALLER DE DEPORTES'},
-{semestre:2, nombre:'TEORIA E HISTORIA CRITICA DE LA ARQUITECTURA I', id:'thca1', prereq:'propinvest'},
-// Semestre 3
-{semestre:3, nombre:'PROYECTOS III: ARQUITECTURA Y LUGAR', id:'proy3', prereq:'proy2'},
-{semestre:3, nombre:'REPRESENTACIÓN III: EL SENTIDO DE LA ARQUITECTURA', id:'rep3', prereq:'rep2'},
-{semestre:3, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES I'},
-{semestre:3, nombre:'TALLER DE LECTURA Y REDACCIÓN'},
-{semestre:3, nombre:'TEORÍA E HISTORIA CRITICA DE LA ARQUITECTURA II', id:'thca2', prereq:'thca1'},
-// Semestre 4
-{semestre:4, nombre:'PROYECTOS IV: HABITAR LA VIVIENDA', id:'proy4', prereq:'proy3'},
-{semestre:4, nombre:'RESPONSABILIDAD CIUDADANA Y ECOLOGIA'},
-{semestre:4, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES II', id:'sistemat2'},
-{semestre:4, nombre:'TALLER DE COACHING Y LIDERAZGO'},
-{semestre:4, nombre:'TALLER DE FELICIDAD Y BIENESTAR'},
-{semestre:4, nombre:'TALLER DE INTELIGENCIA EMOCIONAL Y HABILIDADES SOCIALES'},
-{semestre:4, nombre:'TEORIA E HISTORIA CRITICA DE LA ARQUITECTURA III', id:'thca3', prereq:'thca2'},
+  // Semestre 1
+  {id:'mat1', sem:1, nombre:'MATEMÁTICA'},
+  {id:'idper', sem:1, nombre:'IDENTIDAD Y PERUANIDAD'},
+  {id:'propinvest', sem:1, nombre:'PROPEDÉUTICA PARA LA INVESTIGACIÓN'},
+  {id:'proy1', sem:1, nombre:'PROYECTOS 1: EL ESPACIO CORPORAL'},
+  {id:'rep1', sem:1, nombre:'REPRESENTACIÓN 1: PENSAMIENTO Y REALIDAD'},
+  {id:'tartes', sem:1, nombre:'TALLER DE ARTES'},
+
+  // Semestre 2
+  {id:'calc', sem:2, nombre:'CÁLCULO'},
+  {id:'proy2', sem:2, nombre:'PROYECTOS II: EL ESPACIO ARQUITECTÓNICO', prereq:'proy1'},
+  {id:'rep2', sem:2, nombre:'REPRESENTACIÓN II: EL PROCESO PROYECTUAL', prereq:'rep1'},
+  {id:'targum', sem:2, nombre:'TALLER DE ARGUMENTACIÓN'},
+  {id:'tdeport', sem:2, nombre:'TALLER DE DEPORTES'},
+  {id:'thca1', sem:2, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA I', prereq:'propinvest'},
+
+  // Semestre 3
+  {id:'proy3', sem:3, nombre:'PROYECTOS III: ARQUITECTURA Y LUGAR', prereq:'proy2'},
+  {id:'rep3', sem:3, nombre:'REPRESENTACIÓN III: EL SENTIDO DE LA ARQUITECTURA', prereq:'rep2'},
+  {id:'sistemat1', sem:3, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES I'},
+  {id:'tlecred', sem:3, nombre:'TALLER DE LECTURA Y REDACCIÓN'},
+  {id:'thca2', sem:3, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA II', prereq:'thca1'},
+
+  // Semestre 4
+  {id:'proy4', sem:4, nombre:'PROYECTOS IV: HABITAR LA VIVIENDA', prereq:'proy3'},
+  {id:'respciu', sem:4, nombre:'RESPONSABILIDAD CIUDADANA Y ECOLOGÍA'},
+  {id:'sistemat2', sem:4, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES II', prereq:'sistemat1'},
+  {id:'tcoach', sem:4, nombre:'TALLER DE COACHING Y LIDERAZGO'},
+  {id:'tfeliz', sem:4, nombre:'TALLER DE FELICIDAD Y BIENESTAR'},
+  {id:'tinteli', sem:4, nombre:'TALLER DE INTELIGENCIA EMOCIONAL Y HABILIDADES SOCIALES'},
+  {id:'thca3', sem:4, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA III', prereq:'thca2'},
+
+  // Semestre 5
+  {id:'aa1', sem:5, nombre:'ACONDICIONAMIENTO AMBIENTAL I'},
+  {id:'arqlegal1', sem:5, nombre:'ARQUITECTURA LEGAL I'},
+  {id:'arqperu', sem:5, nombre:'ARQUITECTURA PERUANA Y LATINOAMERICANA', grupo:'elect5'},
+  {id:'arqcine', sem:5, nombre:'ARQUITECTURA Y CINE', grupo:'elect5'},
+  {id:'disint', sem:5, nombre:'DISEÑO DE INTERIORES', grupo:'elect5'},
+  {id:'filoetica', sem:5, nombre:'FILOSOFÍA Y ÉTICA'},
+  {id:'instsani', sem:5, nombre:'INSTALACIONES SANITARIAS', prereq:'sistemat2'},
+  {id:'proy5', sem:5, nombre:'PROYECTOS V: SOSTENIBILIDAD Y MATERIALIDAD', prereq:'proy4'},
+
+  // Semestre 6
+  {id:'aa2', sem:6, nombre:'ACONDICIONAMIENTO AMBIENTAL II', prereq:'aa1'},
+  {id:'arqcontemp', sem:6, nombre:'ARQUITECTURA CONTEMPORÁNEA', grupo:'elect6'},
+  {id:'arqlegal2', sem:6, nombre:'ARQUITECTURA LEGAL II: EXPEDIENTES TÉCNICOS', prereq:'arqlegal1'},
+  {id:'disarqcom', sem:6, nombre:'DISEÑO DE ARQUITECTURA COMERCIAL', grupo:'elect6'},
+  {id:'instelec', sem:6, nombre:'INSTALACIONES ELECTROMECÁNICAS', prereq:'instsani'},
+  {id:'metinvest', sem:6, nombre:'METODOLOGÍA DE LA INVESTIGACIÓN', prereq:'propinvest'},
+  {id:'proy6', sem:6, nombre:'PROYECTOS VI: ARQUITECTURA Y PRE EXISTENCIAS', prereq:'proy5'},
+  {id:'redcient', sem:6, nombre:'REDACCIÓN CIENTÍFICA Y PUBLICACIÓN DE ARTÍCULOS', grupo:'elect6'},
+
+  // Semestre 7
+  {id:'arqgenero', sem:7, nombre:'ARQUITECTURA Y URBANISMO CON ENFOQUE DE GÉNERO', grupo:'elect7'},
+  {id:'const1', sem:7, nombre:'CONSTRUCCIÓN I', prereq:'instsani'},
+  {id:'leancons', sem:7, nombre:'LEAN CONSTRUCTION', grupo:'elect7'},
+  {id:'promoemp', sem:7, nombre:'PROMOCIÓN Y EMPRENDIMIENTO DE PROYECTOS'},
+  {id:'proy7', sem:7, nombre:'PROYECTOS VII: HABITAR, CULTURA Y ESPACIO PÚBLICO', prereq:'proy6'},
+  {id:'thcu1', sem:7, nombre:'TEORÍA E HISTORIA CRÍTICA DEL URBANISMO I', prereq:'aa2'},
+  {id:'urbinvest', sem:7, nombre:'URBANISMO E INVESTIGACIÓN', grupo:'elect7'},
+
+  // Semestre 8
+  {id:'bimmgmt', sem:8, nombre:'BIM & MANAGEMENT', grupo:'elect8'},
+  {id:'const2', sem:8, nombre:'CONSTRUCCIÓN II', prereq:'const1'},
+  {id:'dirproy', sem:8, nombre:'DIRECCIÓN DE PROYECTOS Y OBRAS'},
+  {id:'disparam', sem:8, nombre:'DISEÑO PARAMÉTRICO', grupo:'elect8'},
+  {id:'planestr', sem:8, nombre:'PLANEAMIENTO ESTRATÉGICO', grupo:'elect8'},
+  {id:'proy8', sem:8, nombre:'PROYECTOS VIII: ARQUITECTURA Y PAISAJE', prereq:'proy7'},
+  {id:'thcu2', sem:8, nombre:'TEORÍA E HISTORIA CRÍTICA DEL URBANISMO II', prereq:'thcu1'},
+
+  // Semestre 9
+  {id:'antrochicha', sem:9, nombre:'ANTROPOLOGÍA DE LA CULTURA CHICHA PERUANA', grupo:'elect9'},
+  {id:'estprob', sem:9, nombre:'ESTADÍSTICA Y PROBABILIDADES'},
+  {id:'luminote', sem:9, nombre:'LUMINOTECNIA Y ACÚSTICA', grupo:'elect9'},
+  {id:'proy9', sem:9, nombre:'PROYECTOS IX: ARQUITECTURA, CIUDAD Y TERRITORIO', prereq:'proy8'},
+  {id:'restaurac', sem:9, nombre:'RESTAURACIÓN Y PATOLOGÍAS EN EDIFICACIONES', grupo:'elect9'},
+  {id:'tinvest1', sem:9, nombre:'TALLER DE INVESTIGACIÓN I'},
+
+  // Semestre 10
+  {id:'gestproy', sem:10, nombre:'GESTIÓN DE PROYECTOS'},
+  {id:'proy10', sem:10, nombre:'PROYECTOS X: PROYECTO DE FIN DE CARRERA', prereq:'proy9'},
+  {id:'tinvest2', sem:10, nombre:'TALLER DE INVESTIGACIÓN II', prereq:'tinvest1'},
+  {id:'trabinvest', sem:10, nombre:'TRABAJO DE INVESTIGACIÓN'},
+
+  // Semestre 11
+  {id:'practicas', sem:11, nombre:'PRÁCTICAS PRE PROFESIONALES', prereq:'proy10'},
+  {id:'semtesis', sem:11, nombre:'SEMINARIO DE TESIS', prereq:'tinvest2'},
 ];
 
-const container = document.getElementById('malla');
-for(let s=1;s<=4;s++){
-    const div=document.createElement('div');
-    div.className='semestre';
-    const h=document.createElement('h2');
-    h.textContent=`Semestre ${s}`;
-    div.appendChild(h);
-    const ul=document.createElement('ul');
-    cursos.filter(c=>c.semestre===s).forEach(curso=>{
-        const li=document.createElement('li');
-        const a=document.createElement('a');
-        a.textContent=curso.nombre;
-        a.href='#';
-        a.className='curso';
-        if(curso.creditos) a.classList.add('credito');
-        if(curso.id) a.dataset.curso=curso.id;
-        if(curso.prereq) a.dataset.prereq=curso.prereq;
-        function actualizarEstadoCursos() {
-    document.querySelectorAll('.curso').forEach(cursoEl => {
-        const prereqId = cursoEl.dataset.prereq;
-        if (prereqId) {
-            const prereq = document.querySelector(`[data-curso='${prereqId}']`);
-            if (!prereq || !prereq.classList.contains('completado')) {
-                cursoEl.classList.add('desactivado');
-            } else {
-                cursoEl.classList.remove('desactivado');
-            }
-        }
-    });
+// ---------- ESTADO (persistido en localStorage) ----------
+const STORAGE_KEY = 'malla-arquitectura-progreso';
+
+function cargarEstado() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
 }
 
-a.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (a.classList.contains('desactivado')) {
-        alert('Debes completar primero el curso prerequisito');
-        return;
-    }
-    a.classList.toggle('completado');
-    actualizarEstadoCursos();
-});
-        li.appendChild(a);
-        ul.appendChild(li);
-    });
-    div.appendChild(ul);
-    container.appendChild(div);
-}
-</script>
-    <script>
-const cursos5y6 = [
-// Semestre 5
-{semestre:5, nombre:'ACONDICIONAMIENTO AMBIENTAL I', id:'aa1'},
-{semestre:5, nombre:'ARQUITECTURA LEGAL I', id:'arqlegal1'},
-{semestre:5, nombre:'ARQUITECTURA PERUANA Y LATINOAMERICANA', creditos:80},
-{semestre:5, nombre:'ARQUITECTURA Y CINE', creditos:80},
-{semestre:5, nombre:'DISEÑO DE INTERIORES', creditos:80},
-{semestre:5, nombre:'FILOSOFÍA Y ÉTICA'},
-{semestre:5, nombre:'INSTALACIONES SANITARIAS', id:'instsani', prereq:'sistemat2'},
-{semestre:5, nombre:'PROYECTOS V: SOSTENIBILIDAD Y MATERIALIDAD', id:'proy5', prereq:'proy4'},
-// Semestre 6
-{semestre:6, nombre:'ACONDICIONAMIENTO AMBIENTAL II', id:'aa2', prereq:'aa1'},
-{semestre:6, nombre:'ARQUITECTURA CONTEMPORÁNEA', creditos:100},
-{semestre:6, nombre:'ARQUITECTURA LEGAL II: EXPEDIENTES TÉCNICOS', prereq:'arqlegal1'},
-{semestre:6, nombre:'DISEÑO DE ARQUITECTURA COMERCIAL', creditos:100},
-{semestre:6, nombre:'INSTALACIONES ELECTROMECÁNICAS', prereq:'instsani'},
-{semestre:6, nombre:'METODOLOGÍA DE LA INVESTIGACIÓN', prereq:'propinvest'},
-{semestre:6, nombre:'PROYECTOS VI: ARQUITECTURA Y PRE EXISTENCIAS', id:'proy6', prereq:'proy5'},
-{semestre:6, nombre:'REDACCIÓN CIENTÍFICA Y PUBLICACIÓN DE ARTÍCULOS', creditos:100},
-];
+let estado = cargarEstado(); // { [id]: {completado: bool, creditos: number|null, nota: number|null} }
 
-cursos5y6.forEach(curso => {
-    const divId = `semestre-${curso.semestre}`;
-    let div = document.getElementById(divId);
-    if (!div) {
-        div = document.createElement('div');
-        div.className = 'semestre';
-        div.id = divId;
-        const h = document.createElement('h2');
-        h.textContent = `Semestre ${curso.semestre}`;
-        div.appendChild(h);
-        const ul = document.createElement('ul');
-        div.appendChild(ul);
-        document.getElementById('malla').appendChild(div);
-    }
-    const ul = div.querySelector('ul');
+function guardarEstado() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+}
+
+function getInfo(id) {
+  if (!estado[id]) estado[id] = {completado:false, creditos:null, nota:null};
+  return estado[id];
+}
+
+// ---------- RENDER ----------
+const cursosPorId = Object.fromEntries(cursos.map(c => [c.id, c]));
+const malla = document.getElementById('malla');
+const semestres = [...new Set(cursos.map(c => c.sem))].sort((a,b)=>a-b);
+
+const elementosPorId = {};
+
+semestres.forEach(s => {
+  const div = document.createElement('div');
+  div.className = 'semestre';
+  const h = document.createElement('h2');
+  h.textContent = `Semestre ${s}`;
+  div.appendChild(h);
+  const ul = document.createElement('ul');
+
+  cursos.filter(c => c.sem === s).forEach(curso => {
     const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = curso.nombre;
-    a.href = '#';
-    a.className = 'curso';
-    if (curso.creditos) a.classList.add('credito');
-    if (curso.id) a.dataset.curso = curso.id;
-    if (curso.prereq) a.dataset.prereq = curso.prereq;
-   function actualizarEstadoCursos() {
-    document.querySelectorAll('.curso').forEach(cursoEl => {
-        const prereqId = cursoEl.dataset.prereq;
-        if (prereqId) {
-            const prereq = document.querySelector(`[data-curso='${prereqId}']`);
-            if (!prereq || !prereq.classList.contains('completado')) {
-                cursoEl.classList.add('desactivado');
-            } else {
-                cursoEl.classList.remove('desactivado');
-            }
-        }
-    });
-}
+    const card = document.createElement('div');
+    card.className = 'curso';
+    if (curso.grupo) card.classList.add('electivo');
 
-a.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (a.classList.contains('desactivado')) {
-        alert('Debes completar primero el curso prerequisito');
-        return;
-    }
-    a.classList.toggle('completado');
-    actualizarEstadoCursos();
-});
-    li.appendChild(a);
+    const nombreDiv = document.createElement('div');
+    nombreDiv.className = 'curso-nombre';
+    const check = document.createElement('span');
+    check.className = 'check';
+    nombreDiv.appendChild(check);
+    const span = document.createElement('span');
+    span.textContent = curso.nombre;
+    nombreDiv.appendChild(span);
+    card.appendChild(nombreDiv);
+
+    const campos = document.createElement('div');
+    campos.className = 'campos';
+    campos.innerHTML = `
+      <div class="campo-grupo">
+        <label>Créditos</label>
+        <input type="number" min="0" step="1" class="input-creditos">
+      </div>
+      <div class="campo-grupo">
+        <label>Nota</label>
+        <input type="number" min="0" max="20" step="0.1" class="input-nota">
+      </div>
+    `;
+    card.appendChild(campos);
+
+    const inputCreditos = campos.querySelector('.input-creditos');
+    const inputNota = campos.querySelector('.input-nota');
+
+    const info = getInfo(curso.id);
+    inputCreditos.value = info.creditos ?? '';
+    inputNota.value = info.nota ?? '';
+
+    inputCreditos.addEventListener('click', e => e.stopPropagation());
+    inputNota.addEventListener('click', e => e.stopPropagation());
+    inputCreditos.addEventListener('input', () => {
+      getInfo(curso.id).creditos = inputCreditos.value === '' ? null : parseFloat(inputCreditos.value);
+      guardarEstado();
+      actualizarResumen();
+    });
+    inputNota.addEventListener('input', () => {
+      getInfo(curso.id).nota = inputNota.value === '' ? null : parseFloat(inputNota.value);
+      guardarEstado();
+      actualizarResumen();
+    });
+
+    card.addEventListener('click', () => {
+      if (card.classList.contains('desactivado')) return;
+      const info = getInfo(curso.id);
+      info.completado = !info.completado;
+      guardarEstado();
+      actualizarTodo();
+    });
+
+    li.appendChild(card);
     ul.appendChild(li);
+    elementosPorId[curso.id] = card;
+  });
+
+  div.appendChild(ul);
+  malla.appendChild(div);
 });
-</script>
-    <script>
-const cursos7y8 = [
-// Semestre 7
-{semestre:7, nombre:'ARQUITECTURA Y URBANISMO CON ENFOQUE DE GÉNERO', creditos:120},
-{semestre:7, nombre:'CONSTRUCCIÓN I', id:'const1', prereq:'instsani'},
-{semestre:7, nombre:'LEAN CONSTRUCTION', creditos:120},
-{semestre:7, nombre:'PROMOCIÓN Y EMPRENDIMIENTO DE PROYECTOS'},
-{semestre:7, nombre:'PROYECTOS VII: HABITAR, CULTURA Y ESPACIO PÚBLICO', id:'proy7', prereq:'proy6'},
-{semestre:7, nombre:'TEORÍA E HISTORIA CRITICA DEL URBANISMO I', id:'thcu1', prereq:'aa2'},
-{semestre:7, nombre:'URBANISMO E INVESTIGACIÓN', creditos:120},
 
-// Semestre 8
-{semestre:8, nombre:'BIM & MANAGEMENT', creditos:140},
-{semestre:8, nombre:'CONSTRUCCIÓN II', id:'const2', prereq:'const1'},
-{semestre:8, nombre:'DIRECCIÓN DE PROYECTOS Y OBRAS'},
-{semestre:8, nombre:'DISEÑO PARAMÉTRICO', creditos:140},
-{semestre:8, nombre:'PLANEAMIENTO ESTRATÉGICO', creditos:140},
-{semestre:8, nombre:'PROYECTOS VIII: ARQUITECTURA Y PAISAJE', id:'proy8', prereq:'proy7'},
-{semestre:8, nombre:'TEORÍA E HISTORIA CRITICA DEL URBANISMO II', id:'thcu2', prereq:'thcu1'},
-];
+// ---------- LÓGICA DE BLOQUEOS ----------
+function actualizarBloqueos() {
+  cursos.forEach(curso => {
+    const card = elementosPorId[curso.id];
+    const info = getInfo(curso.id);
+    let bloqueadoPrereq = false;
+    let bloqueadoGrupo = false;
 
-cursos7y8.forEach(curso => {
-    const divId = `semestre-${curso.semestre}`;
-    let div = document.getElementById(divId);
-    if (!div) {
-        div = document.createElement('div');
-        div.className = 'semestre';
-        div.id = divId;
-        const h = document.createElement('h2');
-        h.textContent = `Semestre ${curso.semestre}`;
-        div.appendChild(h);
-        const ul = document.createElement('ul');
-        div.appendChild(ul);
-        document.getElementById('malla').appendChild(div);
+    if (curso.prereq) {
+      const prereqInfo = getInfo(curso.prereq);
+      if (!prereqInfo.completado) bloqueadoPrereq = true;
     }
-    const ul = div.querySelector('ul');
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = curso.nombre;
-    a.href = '#';
-    a.className = 'curso';
-    if (curso.creditos) a.classList.add('credito');
-    if (curso.id) a.dataset.curso = curso.id;
-    if (curso.prereq) a.dataset.prereq = curso.prereq;
-    function actualizarEstadoCursos() {
-    document.querySelectorAll('.curso').forEach(cursoEl => {
-        const prereqId = cursoEl.dataset.prereq;
-        if (prereqId) {
-            const prereq = document.querySelector(`[data-curso='${prereqId}']`);
-            if (!prereq || !prereq.classList.contains('completado')) {
-                cursoEl.classList.add('desactivado');
-            } else {
-                cursoEl.classList.remove('desactivado');
-            }
-        }
-    });
+
+    if (curso.grupo && !info.completado) {
+      const otroElegido = cursos.some(c => c.grupo === curso.grupo && c.id !== curso.id && getInfo(c.id).completado);
+      if (otroElegido) bloqueadoGrupo = true;
+    }
+
+    card.classList.toggle('desactivado', bloqueadoPrereq || bloqueadoGrupo);
+    card.classList.toggle('desactivado-prereq', bloqueadoPrereq);
+    card.classList.toggle('desactivado-grupo', bloqueadoGrupo && !bloqueadoPrereq);
+    card.classList.toggle('completado', info.completado);
+  });
 }
 
-a.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (a.classList.contains('desactivado')) {
-        alert('Debes completar primero el curso prerequisito');
-        return;
+// ---------- RESUMEN (progreso, créditos, promedio) ----------
+function actualizarResumen() {
+  const total = cursos.length;
+  const completados = cursos.filter(c => getInfo(c.id).completado).length;
+  const porcentaje = total ? Math.round((completados / total) * 100) : 0;
+
+  document.getElementById('progreso-texto').textContent =
+    `Progreso: ${porcentaje}% (${completados}/${total} cursos completados)`;
+  document.getElementById('barra-relleno').style.width = `${porcentaje}%`;
+  document.getElementById('dato-restantes').textContent = total - completados;
+
+  let sumaCreditos = 0;
+  let sumaPonderada = 0;
+  let creditosConNota = 0;
+
+  cursos.forEach(c => {
+    const info = getInfo(c.id);
+    if (info.completado && info.creditos) {
+      sumaCreditos += info.creditos;
+      if (info.nota !== null && !isNaN(info.nota)) {
+        sumaPonderada += info.creditos * info.nota;
+        creditosConNota += info.creditos;
+      }
     }
-    a.classList.toggle('completado');
-    actualizarEstadoCursos();
-});
-    li.appendChild(a);
-    ul.appendChild(li);
-});
-</script>
-    <script>
-const cursos9a11 = [
-// Semestre 9
-{semestre:9, nombre:'ANTROPOLOGÍA DE LA CULTURA CHICHA PERUANA', creditos:160},
-{semestre:9, nombre:'ESTADÍSTICA Y PROBABILIDADES'},
-{semestre:9, nombre:'LUMINOTECNIA Y ACÚSTICA', creditos:160},
-{semestre:9, nombre:'PROYECTOS IX: ARQUITECTURA, CIUDAD Y TERRITORIO', id:'proy9', prereq:'proy8'},
-{semestre:9, nombre:'RESTAURACIÓN Y PATOLOGÍAS EN EDIFICACIONES', creditos:160},
-{semestre:9, nombre:'TALLER DE INVESTIGACIÓN I', id:'tinvest1'},
+  });
 
-// Semestre 10
-{semestre:10, nombre:'GESTIÓN DE PROYECTOS'},
-{semestre:10, nombre:'PROYECTOS X: PROYECTO DE FIN DE CARRERA', id:'proy10', prereq:'proy9'},
-{semestre:10, nombre:'TALLER DE INVESTIGACIÓN II', id:'tinvest2', prereq:'tinvest1'},
-{semestre:10, nombre:'TRABAJO DE INVESTIGACIÓN'},
-
-// Semestre 11
-{semestre:11, nombre:'PRÁCTICAS PRE PROFESIONALES', prereq:'proy10'},
-{semestre:11, nombre:'SEMINARIO DE TESIS', prereq:'tinvest2'},
-];
-
-cursos9a11.forEach(curso => {
-    const divId = `semestre-${curso.semestre}`;
-    let div = document.getElementById(divId);
-    if (!div) {
-        div = document.createElement('div');
-        div.className = 'semestre';
-        div.id = divId;
-        const h = document.createElement('h2');
-        h.textContent = `Semestre ${curso.semestre}`;
-        div.appendChild(h);
-        const ul = document.createElement('ul');
-        div.appendChild(ul);
-        document.getElementById('malla').appendChild(div);
-    }
-    const ul = div.querySelector('ul');
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = curso.nombre;
-    a.href = '#';
-    a.className = 'curso';
-    if (curso.creditos) a.classList.add('credito');
-    if (curso.id) a.dataset.curso = curso.id;
-    if (curso.prereq) a.dataset.prereq = curso.prereq;
-a.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (a.classList.contains('desactivado')) {
-        alert('Debes completar primero el curso prerequisito');
-        return;
-    }
-    a.classList.toggle('completado');
-    actualizarEstadoCursos();
-});
-li.appendChild(a);
-ul.appendChild(li);
-});
-function actualizarProgreso() {
-    const cursosTotales = document.querySelectorAll('.curso').length;
-    const cursosCompletados = document.querySelectorAll('.curso.completado').length;
-    const porcentaje = cursosTotales ? Math.round((cursosCompletados / cursosTotales) * 100) : 0;
-
-    document.getElementById('progreso-texto').textContent =
-        `Progreso: ${porcentaje}% (${cursosCompletados}/${cursosTotales} cursos completados)`;
-
-    document.getElementById('barra-relleno').style.width = `${porcentaje}%`;
+  document.getElementById('dato-creditos').textContent = sumaCreditos;
+  document.getElementById('dato-promedio').textContent =
+    creditosConNota > 0 ? (sumaPonderada / creditosConNota).toFixed(2) : '--';
 }
 
-// Actualiza progreso al cargar
-actualizarProgreso();
+function actualizarTodo() {
+  actualizarBloqueos();
+  actualizarResumen();
+}
 
-// Actualiza progreso cada vez que completes un curso
-document.querySelectorAll('.curso').forEach(curso => {
-    curso.addEventListener('click', actualizarProgreso);
+document.getElementById('reiniciar').addEventListener('click', () => {
+  if (confirm('¿Seguro que quieres borrar todo tu progreso guardado? Esta acción no se puede deshacer.')) {
+    estado = {};
+    localStorage.removeItem(STORAGE_KEY);
+    document.querySelectorAll('.input-creditos, .input-nota').forEach(i => i.value = '');
+    actualizarTodo();
+  }
 });
+
+actualizarTodo();
 </script>
 </body>
 </html>
