@@ -4,219 +4,891 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malla Curricular de Arquitectura</title>
- <a href="simulador-horario.html" style="display:inline-block;margin:8px 0 4px;padding:8px 16px;background:#8ecae6;color:#2b4c7e;text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;">
-  📅 Simulador de horario
-</a>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat:wght@600;700&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --color-fondo: #f5eef2;
+    --color-tarjeta: #ffe3ec;
+    --color-acento: #e5507a;
+    --color-texto: #2b2b2b;
+    --color-texto-tarjeta: #2b2b2b;
+    --color-llevado: #8ecae6;
+    --fuente-header: 'Bebas Neue', sans-serif;
+    --fuente-body: 'Inter', sans-serif;
+  }
+
   * { box-sizing: border-box; }
 
   body {
-    font-family: sans-serif;
-    background: #f0f4fa;
-    color: #333;
-    text-align: center;
-    padding: 20px;
+    font-family: var(--fuente-body);
+    background: var(--color-fondo);
+    color: var(--color-texto);
+    margin: 0;
+    padding: 0 0 40px 0;
+    transition: background 0.3s, color 0.3s;
   }
 
-  h1 { margin-bottom: 4px; }
+  .nota-cursiva {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    opacity: 0.85;
+  }
 
-  #resumen {
-    max-width: 620px;
-    margin: 16px auto 24px;
+  .icono { display: inline-flex; vertical-align: middle; }
+  .icono svg { display: block; }
+
+  /* ---------- Ícono flotante de ajustes ---------- */
+  #btn-ajustes {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    cursor: pointer;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
+  #btn-ajustes:hover { background: #f4f4f4; }
+
+  #btn-simulador {
+    position: fixed;
+    top: 16px;
+    right: 68px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 22px;
+    background: var(--color-acento);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    cursor: pointer;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    font-family: var(--fuente-body);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  #btn-simulador:hover { filter: brightness(1.08); }
+  #btn-simulador svg { flex-shrink: 0; }
+
+  @media (max-width: 600px) {
+    #btn-simulador span { display: none; }
+    #btn-simulador { padding: 0; width: 44px; justify-content: center; border-radius: 50%; right: 68px; }
+  }
+
+  #panel-ajustes {
+    position: fixed;
+    top: 66px;
+    right: 16px;
+    width: 280px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    z-index: 30;
+    color: #333;
+    font-family: 'Inter', sans-serif;
+  }
+  #panel-ajustes.abierto { display: flex; }
+  #panel-ajustes h4 {
+    margin: 0 0 2px 0;
+    font-size: 12px;
+    color: #555;
+  }
+  #panel-ajustes .campo-ajuste {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  #panel-ajustes input[type="color"] {
+    width: 36px; height: 26px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #panel-ajustes select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #cfdff0;
+    font-size: 12px;
+  }
+  #panel-ajustes .check-auto {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.75;
+  }
+  .simbolos-elegir, .stickers-elegir { display: flex; gap: 4px; flex-wrap: wrap; }
+  .simbolos-elegir button, .stickers-elegir button {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    border: 2px solid #eee;
+    background: #fafafa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    padding: 0;
+    overflow: hidden;
+  }
+  .simbolos-elegir button.elegido, .stickers-elegir button.elegido { border-color: var(--color-acento); background: #fff0f4; }
+  .stickers-elegir img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  #panel-ajustes hr { border: none; border-top: 1px solid #eee; margin: 2px 0; }
+  .boton-mini {
+    font-size: 12px;
+    background: #fff0f3;
+    border: 1px solid #f78da7;
+    color: #c9184a;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .boton-mini.secundario {
+    background: #eef4fb;
+    border-color: #cfdff0;
+    color: #2b4c7e;
+  }
+  .fila-botones { display: flex; gap: 6px; flex-wrap: wrap; }
+  input[type="file"] { font-size: 11px; max-width: 100%; }
+
+  /* ---------- Banner de cabecera ---------- */
+  #banner {
+    background: var(--color-acento);
+    padding: 28px 20px 34px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  #banner h1 {
+    font-family: var(--fuente-header);
+    font-size: 46px;
+    letter-spacing: 2px;
+    margin: 6px 0 2px;
+    text-transform: uppercase;
+  }
+  #banner .subt {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    opacity: 0.95;
+  }
+
+  .mascota-wrap {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 6px;
+  }
+  .mascota-wrap svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .mascota-fill-clip { position: absolute; inset: 0; transition: clip-path 0.5s; overflow: hidden; }
+  .mascota-img {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    margin: 0 auto 6px;
+    display: block;
+  }
+
+  /* ---------- Insignias ---------- */
+  #insignias {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .insignia {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    filter: grayscale(1);
+    opacity: 0.4;
+    transition: opacity 0.3s, filter 0.3s, transform 0.2s;
+  }
+  .insignia.lograda {
+    background: #fff;
+    color: var(--color-acento);
+    filter: none;
+    opacity: 1;
+  }
+  .insignia:hover { transform: scale(1.08); }
+
+  /* ---------- Contenedor general ---------- */
+  .seccion {
+    max-width: 900px;
+    margin: 22px auto;
+    padding: 0 16px;
+  }
+  .seccion h2 {
+    font-family: var(--fuente-header);
+    font-size: 26px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-acento);
+    border-bottom: 3px solid var(--color-acento);
+    display: inline-block;
+    padding-bottom: 2px;
+    margin-bottom: 12px;
+  }
+
+  .caja {
     background: #ffffff;
     border-radius: 14px;
     padding: 16px 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: #333;
   }
 
+  /* ---------- Resumen ---------- */
   #resumen .fila {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 6px 0;
-    font-size: 14px;
+    gap: 10px;
+    margin: 10px 0 0;
   }
-
   #resumen .dato {
-    background: #e0ebf7;
-    border-radius: 8px;
-    padding: 8px 12px;
+    background: var(--color-tarjeta);
+    color: var(--color-texto-tarjeta);
+    border-radius: 10px;
+    padding: 10px 14px;
     flex: 1;
-    min-width: 130px;
+    min-width: 140px;
+    transition: background 0.3s, color 0.3s;
   }
-
   #resumen .dato strong {
     display: block;
-    font-size: 18px;
-    color: #2b4c7e;
+    font-family: var(--fuente-header);
+    font-size: 24px;
+    letter-spacing: 1px;
   }
-
   #barra-progreso {
     width: 100%;
-    background: #ddd;
+    background: #eee;
     border-radius: 10px;
     overflow: hidden;
-    height: 18px;
-    margin-top: 10px;
+    height: 16px;
+    margin-top: 12px;
   }
-
   #barra-relleno {
     width: 0%;
     height: 100%;
-    background: linear-gradient(90deg, #f78da7, #a2d2ff);
+    background: var(--color-acento);
     transition: width 0.5s;
   }
 
-  #reiniciar {
-    margin-top: 10px;
-    background: #fff0f3;
-    border: 1px solid #f78da7;
-    color: #c9184a;
-    padding: 6px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
+  /* ---------- Gráfico de créditos por semestre ---------- */
+  #grafico-creditos {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 140px;
+    padding-top: 10px;
+    position: relative;
   }
-  #reiniciar:hover { background: #ffd9e2; }
+  #grafico-creditos .linea-limite {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 2px dashed #bbb;
+    font-size: 10px;
+    color: #999;
+    text-align: right;
+    padding-right: 2px;
+  }
+  .barra-sem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+  }
+  .barra-sem .barra {
+    width: 70%;
+    background: var(--color-llevado);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.4s, background 0.3s;
+    min-height: 2px;
+  }
+  .barra-sem .barra.excedido { background: #e5383b; }
+  .barra-sem .num { font-weight: 700; font-size: 10px; }
 
-  .leyenda {
-    max-width: 620px;
-    margin: 0 auto 20px;
-    font-size: 13px;
+  /* ---------- Ruta de egreso ---------- */
+  #ruta-egreso .valor-grande {
+    font-family: var(--fuente-header);
+    font-size: 40px;
+    color: var(--color-acento);
+    letter-spacing: 1px;
+  }
+
+  /* ---------- Cursos disponibles ---------- */
+  .bloque-disponible { margin-bottom: 14px; }
+  .bloque-disponible h4 {
+    font-family: var(--fuente-header);
+    font-size: 16px;
+    letter-spacing: 1px;
+    margin: 0 0 4px;
     color: #555;
   }
-  .leyenda span { display: inline-block; margin: 0 8px; }
-  .punto {
-    display: inline-block;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    margin-right: 4px;
+  .bloque-disponible ul { list-style: none; padding: 0; margin: 0; }
+  .bloque-disponible li { font-size: 13px; padding: 3px 0; display: flex; justify-content: space-between; }
+  .aviso-exceso { color: #e5383b; font-size: 11px; font-style: italic; margin-top: 2px; }
+
+  /* ---------- Aprobados / Desaprobados ---------- */
+  #listas {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .lista-box {
+    flex: 1;
+    min-width: 260px;
+  }
+  .lista-box h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lista-box.aprobados h3 { color: #2a9d8f; }
+  .lista-box.desaprobados h3 { color: #c9184a; }
+  .lista-box ul { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; }
+  .lista-box li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 6px;
+  }
+  .lista-box .vacio { font-size: 12px; opacity: 0.6; font-family: 'Caveat', cursive; font-size: 15px; }
+  .badge-nota {
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 11px;
+    color: white;
+  }
+  .aprobados .badge-nota { background: #2a9d8f; }
+  .desaprobados .badge-nota { background: #e5383b; }
+
+  /* ---------- Buscador ---------- */
+  #buscador {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    font-family: var(--fuente-body);
   }
 
+  /* ---------- Malla ---------- */
   #malla {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
   }
 
   .semestre {
-    background: #e0ebf7;
+    background: var(--color-tarjeta);
     padding: 15px;
     margin: 10px;
-    border-radius: 12px;
+    border-radius: 14px;
     width: 280px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     vertical-align: top;
+    transition: background 0.3s;
   }
 
-  .semestre h2 { color: #2b4c7e; margin-top: 0; }
+  .semestre h2 {
+    color: var(--color-texto-tarjeta);
+    margin: 0 0 10px;
+    font-family: var(--fuente-header);
+    font-size: 22px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
 
   .semestre ul { list-style: none; padding: 0; margin: 0; }
   .semestre li { margin: 8px 0; }
 
   .curso {
     background: #ffffff;
-    color: #2b4c7e;
+    color: #2b2b2b;
     border-radius: 8px;
     padding: 8px 10px;
     text-align: left;
     cursor: pointer;
     transition: background 0.2s, transform 0.15s, opacity 0.2s;
   }
-  .curso:hover:not(.desactivado) { background: #cfdff0; transform: translateY(-1px); }
+  .curso:hover:not(.desactivado) { background: #f3f3f3; transform: translateY(-1px); }
 
-  .curso-nombre { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .curso-nombre { font-size: 13px; display: flex; align-items: center; gap: 6px; font-family: var(--fuente-body); }
   .curso-nombre .check {
-    width: 14px; height: 14px;
+    width: 18px; height: 18px;
     border-radius: 4px;
     border: 2px solid #8ecae6;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  .curso-nombre .nombre-txt { flex: 1; }
+  .curso-nombre .sticker-mini { width: 15px; height: 15px; }
+  .curso-nombre .sticker-mini img, .curso-nombre .sticker-mini svg { width: 100%; height: 100%; border-radius: 3px; }
 
-  .curso.completado { background: #8ecae6!important; color: white!important; font-weight: bold; }
-  .curso.completado .check { background: white; border-color: white; }
+  .curso.aprobado { background: var(--color-llevado) !important; color: white!important; font-weight: bold; }
+  .curso.aprobado .check { background: white; border-color: white; color: var(--color-llevado); }
 
-  .curso.electivo:not(.completado):not(.desactivado) { background: #fff0f3; }
+  .curso.desaprobado { background: #ff8fa3!important; color: white!important; font-weight: bold; }
+  .curso.desaprobado .check { background: white; border-color: white; color: #ff8fa3; }
+
+  .curso.pendiente { background: #cdb4db!important; color: white!important; }
+  .curso.pendiente .check { background: white; border-color: white; color: #cdb4db; }
+
+  .curso.electivo:not(.aprobado):not(.desaprobado):not(.pendiente):not(.desactivado) { background: #fff0f3; }
   .curso.electivo .curso-nombre::after {
     content: 'electivo';
     font-size: 9px;
     font-weight: normal;
-    opacity: 0.6;
-    margin-left: auto;
+    opacity: 0.55;
+    font-family: 'Inter', sans-serif;
   }
 
-  .curso.desactivado {
-    opacity: 0.45;
-    cursor: default;
-  }
-  .curso.desactivado .campos { display: none; }
+  .curso.desactivado { opacity: 0.45; cursor: default; }
+  .curso.oculto { display: none; }
 
-  .campos {
+  .curso.desactivado-prereq .aviso-bloqueo,
+  .curso.desactivado-grupo .aviso-bloqueo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    opacity: 0.9;
+    font-family: 'Caveat', cursive;
+    margin-top: 2px;
+  }
+  .aviso-bloqueo { display: none; }
+
+  /* ---------- Panel lateral de detalle ---------- */
+  #fondo-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 20;
+  }
+  #fondo-panel.abierto { opacity: 1; pointer-events: auto; }
+
+  #panel-detalle {
+    position: fixed;
+    top: 0; right: 0;
+    width: 340px;
+    max-width: 90vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s;
+    z-index: 21;
+    overflow-y: auto;
+    text-align: left;
+    padding: 20px;
+    color: #333;
+    font-family: 'Inter', sans-serif;
+  }
+  #panel-detalle.abierto { transform: translateX(0); }
+
+  #panel-detalle .cerrar {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+  }
+  #panel-detalle h2 {
+    color: var(--color-acento);
+    font-family: var(--fuente-header);
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    margin: 0 30px 4px 0;
+  }
+  #panel-detalle .subinfo {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 14px;
+    font-family: 'Caveat', cursive;
+  }
+
+  .campo-panel { margin-bottom: 14px; }
+  .campo-panel label {
+    font-size: 12px;
+    color: #555;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .campo-panel input[type="number"], .campo-panel textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+  }
+  .campo-panel textarea { resize: vertical; min-height: 50px; }
+
+  .fila-fases { display: flex; gap: 8px; }
+  .fila-fases .campo-panel { flex: 1; }
+
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .stepper button {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .stepper span { min-width: 20px; text-align: center; font-weight: bold; }
+
+  .toggle-llevado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 14px;
+    font-size: 13px;
+  }
+
+  .nota-final-box {
+    background: #f7f7f7;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .nota-final-box .valor {
+    font-family: var(--fuente-header);
+    font-size: 30px;
+    letter-spacing: 1px;
+    color: #555;
+  }
+  .nota-final-box.aprobado .valor { color: #2a9d8f; }
+  .nota-final-box.desaprobado .valor { color: #e5383b; }
+  .nota-final-box .formula {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 3px;
+    font-family: 'Caveat', cursive;
+  }
+
+  .aviso-desaprobado {
+    background: #fff0f0;
+    border: 1px solid #ffb3b3;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: #b00020;
+  }
+  .stickers {
     display: flex;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
   }
-  .campos input {
-    width: 100%;
-    font-size: 12px;
-    padding: 3px 5px;
-    border-radius: 5px;
-    border: 1px solid #cfdff0;
+  .stickers button {
+    width: 32px; height: 32px;
+    background: #fff;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 3px;
+    overflow: hidden;
   }
-  .curso.completado .campos input { border-color: #ffffff88; }
-  .campos label {
-    font-size: 10px;
-    display: block;
-    text-align: left;
-    opacity: 0.75;
-  }
-  .campo-grupo { flex: 1; }
+  .stickers button img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  .stickers button.elegido { border-color: #e5383b; background: #ffe5e5; }
 
-  .curso.desactivado-prereq::before {
-    content: '🔒 requiere prerequisito';
-    display: block;
-    font-size: 10px;
-    opacity: 0.9;
-  }
-  .curso.desactivado-grupo::before {
-    content: '— elegiste otro electivo de este bloque';
-    display: block;
-    font-size: 10px;
-    opacity: 0.9;
+  /* ---------- Tabla imprimible ---------- */
+  #tabla-imprimir { display: none; }
+  #tabla-imprimir table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  #tabla-imprimir th, #tabla-imprimir td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+  #tabla-imprimir th { background: #eee; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #tabla-imprimir, #tabla-imprimir * { visibility: visible; }
+    #tabla-imprimir { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
   }
 </style>
 </head>
 <body>
 
-<h1>🌸 MALLA CURRICULAR ARQUITECTURA 🌸</h1>
-
-<div id="resumen">
-  <p id="progreso-texto">Progreso: 0% (0/0 cursos completados)</p>
-  <div id="barra-progreso"><div id="barra-relleno"></div></div>
-  <div class="fila">
-    <div class="dato"><strong id="dato-restantes">0</strong>cursos por llevar</div>
-    <div class="dato"><strong id="dato-creditos">0</strong>créditos llevados</div>
-    <div class="dato"><strong id="dato-promedio">--</strong>promedio ponderado</div>
+<a id="btn-simulador" href="SIMULADOR-HORARIO.html" title="Ir al simulador de horario">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 3v3M16 3v3"/></svg>
+  <span>Simulador de horario</span>
+</a>
+<button id="btn-ajustes" title="Personalizar apariencia"></button>
+<div id="panel-ajustes">
+  <div>
+    <h4>Fondo de la página</h4>
+    <div class="campo-ajuste"><span>Color</span><input type="color" id="color-fondo"></div>
   </div>
-  <button id="reiniciar">Reiniciar todo el progreso</button>
+  <div>
+    <h4>Tarjetas de semestre</h4>
+    <div class="campo-ajuste"><span>Color</span><input type="color" id="color-tarjeta"></div>
+  </div>
+  <div>
+    <h4>Color de acento (banner, botones, gráfico)</h4>
+    <div class="campo-ajuste"><span>Color</span><input type="color" id="color-acento"></div>
+  </div>
+  <div>
+    <h4>Color de letras</h4>
+    <div class="campo-ajuste"><span>Color</span><input type="color" id="color-texto"></div>
+    <label class="check-auto"><input type="checkbox" id="texto-auto"> Automático según el fondo</label>
+  </div>
+  <div>
+    <h4>Cursos llevados</h4>
+    <div class="campo-ajuste"><span>Color</span><input type="color" id="color-llevado"></div>
+  </div>
+  <div>
+    <h4>Símbolo al marcar llevado</h4>
+    <div class="simbolos-elegir" id="simbolos-elegir"></div>
+  </div>
+  <div>
+    <h4>Estilo de tipografía</h4>
+    <select id="select-fuente">
+      <option value="conejito">Conejito (Bebas + Inter)</option>
+      <option value="editorial">Editorial (Playfair + Work Sans)</option>
+      <option value="retro">Retro pixel (Anton + DM Sans)</option>
+      <option value="manuscrita">Manuscrita (Caveat + Nunito)</option>
+      <option value="clasica">Clásica (Georgia + sans)</option>
+    </select>
+  </div>
+  <hr>
+  <div>
+    <h4>Mascota</h4>
+    <input type="file" id="subir-mascota" accept="image/*">
+    <div class="fila-botones" style="margin-top:6px">
+      <button class="boton-mini secundario" id="quitar-mascota">Usar conejito predeterminado</button>
+    </div>
+  </div>
+  <div>
+    <h4>Agregar stickers propios (para cursos desaprobados)</h4>
+    <input type="file" id="subir-sticker" accept="image/*" multiple>
+  </div>
+  <hr>
+  <div class="fila-botones">
+    <button class="boton-mini secundario" id="exportar-progreso">Exportar progreso</button>
+    <button class="boton-mini secundario" id="importar-progreso-btn">Importar progreso</button>
+    <input type="file" id="importar-progreso-input" accept=".json" style="display:none">
+  </div>
+  <button class="boton-mini" id="restaurar-colores">Restaurar apariencia</button>
 </div>
 
-<p class="leyenda">
-  Haz clic en un curso para marcarlo como llevado. <br>
-  <span><span class="punto" style="background:#8ecae6"></span>completado</span>
-  <span><span class="punto" style="background:#fff0f3;border:1px solid #f78da7"></span>electivo (3 por semestre, elegir uno desactiva los otros)</span>
-  <span><span class="punto" style="background:#ccc"></span>bloqueado por prerequisito</span>
+<div id="banner">
+  <div class="mascota-wrap" id="mascota-wrap"></div>
+  <h1>Malla Curricular</h1>
+  <p class="subt">Arquitectura · UCSM</p>
+  <div id="insignias"></div>
+</div>
+
+<div class="seccion" id="resumen">
+  <div class="caja">
+    <p id="progreso-texto" style="margin:0 0 6px"></p>
+    <div id="barra-progreso"><div id="barra-relleno"></div></div>
+    <div class="fila">
+      <div class="dato"><strong id="dato-restantes">0</strong>cursos por llevar</div>
+      <div class="dato"><strong id="dato-creditos">0</strong>créditos llevados</div>
+      <div class="dato"><strong id="dato-promedio">--</strong>promedio ponderado general</div>
+    </div>
+    <div class="fila-botones" style="margin-top:12px">
+      <button class="boton-mini" id="reiniciar">Reiniciar todo el progreso</button>
+      <button class="boton-mini secundario" id="btn-imprimir">Vista de tabla / imprimir</button>
+    </div>
+  </div>
+</div>
+
+<div class="seccion">
+  <h2>Créditos por semestre</h2>
+  <div class="caja">
+    <div id="grafico-creditos"></div>
+    <p class="nota-cursiva" style="margin:4px 0 0">Cada barra son los créditos llevados en ese semestre. La línea punteada marca tu tope de 20 créditos.</p>
+  </div>
+</div>
+
+<div class="seccion" id="ruta-egreso">
+  <h2>Ruta estimada de egreso</h2>
+  <div class="caja" id="ruta-egreso-contenido"></div>
+</div>
+
+<div class="seccion">
+  <h2>Cursos disponibles para llevar</h2>
+  <div class="caja" id="cursos-disponibles"></div>
+</div>
+
+<div class="seccion">
+  <h2>Aprobados y desaprobados</h2>
+  <div class="caja">
+    <div id="listas">
+      <div class="lista-box aprobados">
+        <h3><span class="icono" id="icono-check"></span> Cursos aprobados</h3>
+        <ul id="lista-aprobados"></ul>
+      </div>
+      <div class="lista-box desaprobados">
+        <h3><span class="icono" id="icono-x"></span> Cursos desaprobados</h3>
+        <ul id="lista-desaprobados"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="seccion">
+  <input type="text" id="buscador" placeholder="Buscar un curso por nombre...">
+</div>
+
+<p class="nota-cursiva" style="text-align:center; max-width:620px; margin:0 auto 16px;">
+  Haz clic en un curso para ver y editar sus detalles (fases, nota final, créditos, veces llevado, apuntes).
 </p>
 
 <div id="malla"></div>
 
+<div id="tabla-imprimir">
+  <h2>Malla curricular — resumen</h2>
+  <table>
+    <thead><tr><th>Semestre</th><th>Curso</th><th>Estado</th><th>Nota final</th><th>Créditos</th></tr></thead>
+    <tbody id="tabla-imprimir-body"></tbody>
+  </table>
+</div>
+
+<!-- Panel lateral -->
+<div id="fondo-panel"></div>
+<div id="panel-detalle">
+  <button class="cerrar" id="cerrar-panel">×</button>
+  <h2 id="panel-nombre"></h2>
+  <p class="subinfo" id="panel-prereq"></p>
+
+  <div class="toggle-llevado">
+    <input type="checkbox" id="panel-llevado">
+    <label for="panel-llevado">Marcar como llevado</label>
+  </div>
+
+  <div class="campo-panel">
+    <label>Créditos</label>
+    <input type="number" min="0" step="1" id="panel-creditos">
+  </div>
+
+  <div class="campo-panel">
+    <label>Veces llevado</label>
+    <div class="stepper">
+      <button id="panel-veces-menos">−</button>
+      <span id="panel-veces-valor">1</span>
+      <button id="panel-veces-mas">+</button>
+    </div>
+  </div>
+
+  <div class="fila-fases">
+    <div class="campo-panel"><label id="label-fase1">Fase 1</label><input type="number" min="0" max="20" step="0.1" id="panel-fase1"></div>
+    <div class="campo-panel"><label id="label-fase2">Fase 2</label><input type="number" min="0" max="20" step="0.1" id="panel-fase2"></div>
+    <div class="campo-panel"><label id="label-fase3">Fase 3</label><input type="number" min="0" max="20" step="0.1" id="panel-fase3"></div>
+  </div>
+
+  <div class="nota-final-box" id="panel-notafinal-box">
+    <div class="valor" id="panel-notafinal-valor">--</div>
+    <div>nota final</div>
+    <div class="formula" id="panel-formula"></div>
+  </div>
+
+  <div class="campo-panel">
+    <label>Apuntes</label>
+    <textarea id="panel-apuntes" placeholder="Profesor, pendientes, comentarios..."></textarea>
+  </div>
+
+  <div class="aviso-desaprobado" id="panel-aviso" style="display:none">
+    Este curso no llegó a la nota mínima aprobatoria (12). ¿Cómo te sientes al respecto? Elige un sticker:
+    <div class="stickers" id="panel-stickers"></div>
+  </div>
+</div>
+
 <script>
-// ---------- DATOS DE LA MALLA ----------
-// prereq: id del curso que se debe completar antes
-// grupo: id del bloque de electivos (solo puede haber uno activo por grupo)
+// ============================================================
+// ÍCONOS (SVG monocromo, sin emojis)
+// ============================================================
+const ICONOS = {
+  brush: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6"/><path d="M13.5 4.5L20 11l-9 9-4-1-1-4 7.5-9.5z"/><path d="M6 15c-1.5 1-2 3-1 5 2 1 4 .5 5-1"/></svg>`,
+  lock: `<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
+  checkCircle: `<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>`,
+  xCircle: `<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`,
+  star: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17l-6.1 3.5 1.5-6.8L2.2 9l6.9-.7z"/></svg>`,
+  layers: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>`,
+  shield: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>`,
+  cap: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>`,
+};
+
+const SIMBOLOS = {
+  check: `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>`,
+  estrella: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17l-6.1 3.5 1.5-6.8L2.2 9l6.9-.7z"/></svg>`,
+  corazon: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8.5C19 16.65 12 21 12 21z"/></svg>`,
+  pata: `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="7" cy="8" r="2"/><circle cx="12" cy="5.5" r="2"/><circle cx="17" cy="8" r="2"/><ellipse cx="12" cy="15.5" rx="6" ry="5"/></svg>`,
+  circulo: `<svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>`,
+  flor: `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="12" cy="12" r="2.3"/><circle cx="12" cy="6" r="2.8"/><circle cx="12" cy="18" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="12" r="2.8"/></svg>`,
+};
+
+const STICKERS_BUILTIN = {
+  triste: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#555" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="0.9" fill="#555" stroke="none"/><circle cx="15" cy="10" r="0.9" fill="#555" stroke="none"/><path d="M8.5 16.5c1-1.5 6-1.5 7 0"/></svg>`,
+  cansado: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#555" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M7.5 10h3M13.5 10h3"/><path d="M9 16q3-1 6 0"/></svg>`,
+  decidido: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#555" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M7 9l3 1M17 9l-3 1"/><path d="M9 15.5h6"/></svg>`,
+  llorando: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#555" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="0.9" fill="#555" stroke="none"/><circle cx="15" cy="10" r="0.9" fill="#555" stroke="none"/><path d="M8.5 15.5c1-1.2 6-1.2 7 0"/><path d="M8.5 12.5l-1 3M15.5 12.5l1 3"/></svg>`,
+  tranquilo: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#555" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M8 10.5h2M14 10.5h2"/><path d="M9 15h6"/></svg>`,
+};
+
+document.getElementById('btn-ajustes').innerHTML = ICONOS.brush;
+document.getElementById('icono-check').innerHTML = ICONOS.checkCircle;
+document.getElementById('icono-x').innerHTML = ICONOS.xCircle;
+
+// ============================================================
+// DATOS DE LA MALLA
+// ============================================================
 const cursos = [
-  // Semestre 1
   {id:'mat1', sem:1, nombre:'MATEMÁTICA'},
   {id:'idper', sem:1, nombre:'IDENTIDAD Y PERUANIDAD'},
   {id:'propinvest', sem:1, nombre:'PROPEDÉUTICA PARA LA INVESTIGACIÓN'},
@@ -224,7 +896,6 @@ const cursos = [
   {id:'rep1', sem:1, nombre:'REPRESENTACIÓN 1: PENSAMIENTO Y REALIDAD'},
   {id:'tartes', sem:1, nombre:'TALLER DE ARTES'},
 
-  // Semestre 2
   {id:'calc', sem:2, nombre:'CÁLCULO'},
   {id:'proy2', sem:2, nombre:'PROYECTOS II: EL ESPACIO ARQUITECTÓNICO', prereq:'proy1'},
   {id:'rep2', sem:2, nombre:'REPRESENTACIÓN II: EL PROCESO PROYECTUAL', prereq:'rep1'},
@@ -232,14 +903,12 @@ const cursos = [
   {id:'tdeport', sem:2, nombre:'TALLER DE DEPORTES'},
   {id:'thca1', sem:2, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA I', prereq:'propinvest'},
 
-  // Semestre 3
   {id:'proy3', sem:3, nombre:'PROYECTOS III: ARQUITECTURA Y LUGAR', prereq:'proy2'},
   {id:'rep3', sem:3, nombre:'REPRESENTACIÓN III: EL SENTIDO DE LA ARQUITECTURA', prereq:'rep2'},
   {id:'sistemat1', sem:3, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES I'},
   {id:'tlecred', sem:3, nombre:'TALLER DE LECTURA Y REDACCIÓN'},
   {id:'thca2', sem:3, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA II', prereq:'thca1'},
 
-  // Semestre 4
   {id:'proy4', sem:4, nombre:'PROYECTOS IV: HABITAR LA VIVIENDA', prereq:'proy3'},
   {id:'respciu', sem:4, nombre:'RESPONSABILIDAD CIUDADANA Y ECOLOGÍA'},
   {id:'sistemat2', sem:4, nombre:'SISTEMAS ESTRUCTURALES Y TECNOLOGÍA DE MATERIALES II', prereq:'sistemat1'},
@@ -248,7 +917,6 @@ const cursos = [
   {id:'tinteli', sem:4, nombre:'TALLER DE INTELIGENCIA EMOCIONAL Y HABILIDADES SOCIALES'},
   {id:'thca3', sem:4, nombre:'TEORÍA E HISTORIA CRÍTICA DE LA ARQUITECTURA III', prereq:'thca2'},
 
-  // Semestre 5
   {id:'aa1', sem:5, nombre:'ACONDICIONAMIENTO AMBIENTAL I'},
   {id:'arqlegal1', sem:5, nombre:'ARQUITECTURA LEGAL I'},
   {id:'arqperu', sem:5, nombre:'ARQUITECTURA PERUANA Y LATINOAMERICANA', grupo:'elect5'},
@@ -258,7 +926,6 @@ const cursos = [
   {id:'instsani', sem:5, nombre:'INSTALACIONES SANITARIAS', prereq:'sistemat2'},
   {id:'proy5', sem:5, nombre:'PROYECTOS V: SOSTENIBILIDAD Y MATERIALIDAD', prereq:'proy4'},
 
-  // Semestre 6
   {id:'aa2', sem:6, nombre:'ACONDICIONAMIENTO AMBIENTAL II', prereq:'aa1'},
   {id:'arqcontemp', sem:6, nombre:'ARQUITECTURA CONTEMPORÁNEA', grupo:'elect6'},
   {id:'arqlegal2', sem:6, nombre:'ARQUITECTURA LEGAL II: EXPEDIENTES TÉCNICOS', prereq:'arqlegal1'},
@@ -268,7 +935,6 @@ const cursos = [
   {id:'proy6', sem:6, nombre:'PROYECTOS VI: ARQUITECTURA Y PRE EXISTENCIAS', prereq:'proy5'},
   {id:'redcient', sem:6, nombre:'REDACCIÓN CIENTÍFICA Y PUBLICACIÓN DE ARTÍCULOS', grupo:'elect6'},
 
-  // Semestre 7
   {id:'arqgenero', sem:7, nombre:'ARQUITECTURA Y URBANISMO CON ENFOQUE DE GÉNERO', grupo:'elect7'},
   {id:'const1', sem:7, nombre:'CONSTRUCCIÓN I', prereq:'instsani'},
   {id:'leancons', sem:7, nombre:'LEAN CONSTRUCTION', grupo:'elect7'},
@@ -277,7 +943,6 @@ const cursos = [
   {id:'thcu1', sem:7, nombre:'TEORÍA E HISTORIA CRÍTICA DEL URBANISMO I', prereq:'aa2'},
   {id:'urbinvest', sem:7, nombre:'URBANISMO E INVESTIGACIÓN', grupo:'elect7'},
 
-  // Semestre 8
   {id:'bimmgmt', sem:8, nombre:'BIM & MANAGEMENT', grupo:'elect8'},
   {id:'const2', sem:8, nombre:'CONSTRUCCIÓN II', prereq:'const1'},
   {id:'dirproy', sem:8, nombre:'DIRECCIÓN DE PROYECTOS Y OBRAS'},
@@ -286,7 +951,6 @@ const cursos = [
   {id:'proy8', sem:8, nombre:'PROYECTOS VIII: ARQUITECTURA Y PAISAJE', prereq:'proy7'},
   {id:'thcu2', sem:8, nombre:'TEORÍA E HISTORIA CRÍTICA DEL URBANISMO II', prereq:'thcu1'},
 
-  // Semestre 9
   {id:'antrochicha', sem:9, nombre:'ANTROPOLOGÍA DE LA CULTURA CHICHA PERUANA', grupo:'elect9'},
   {id:'estprob', sem:9, nombre:'ESTADÍSTICA Y PROBABILIDADES'},
   {id:'luminote', sem:9, nombre:'LUMINOTECNIA Y ACÚSTICA', grupo:'elect9'},
@@ -294,52 +958,203 @@ const cursos = [
   {id:'restaurac', sem:9, nombre:'RESTAURACIÓN Y PATOLOGÍAS EN EDIFICACIONES', grupo:'elect9'},
   {id:'tinvest1', sem:9, nombre:'TALLER DE INVESTIGACIÓN I'},
 
-  // Semestre 10
   {id:'gestproy', sem:10, nombre:'GESTIÓN DE PROYECTOS'},
   {id:'proy10', sem:10, nombre:'PROYECTOS X: PROYECTO DE FIN DE CARRERA', prereq:'proy9'},
   {id:'tinvest2', sem:10, nombre:'TALLER DE INVESTIGACIÓN II', prereq:'tinvest1'},
   {id:'trabinvest', sem:10, nombre:'TRABAJO DE INVESTIGACIÓN'},
 
-  // Semestre 11
   {id:'practicas', sem:11, nombre:'PRÁCTICAS PRE PROFESIONALES', prereq:'proy10'},
   {id:'semtesis', sem:11, nombre:'SEMINARIO DE TESIS', prereq:'tinvest2'},
 ];
 
-// ---------- ESTADO (persistido en localStorage) ----------
+cursos.forEach(c => { c.esProyecto = /^proy\d+$/.test(c.id); });
+
+const NOTA_MINIMA = 12;
+const MAX_CREDITOS_SEM = 20;
+const GRUPOS_ELECTIVOS = [...new Set(cursos.filter(c=>c.grupo).map(c=>c.grupo))];
+
+function nombreSemestre(s) { return `${s}° SEMESTRE`; }
+
+// ============================================================
+// ESTADO
+// ============================================================
 const STORAGE_KEY = 'malla-arquitectura-progreso';
+const APARIENCIA_KEY = 'malla-arquitectura-apariencia';
+const FUENTES = {
+  conejito: { header: "'Bebas Neue', sans-serif", body: "'Inter', sans-serif" },
+  editorial: { header: "'Playfair Display', serif", body: "'Work Sans', sans-serif" },
+  retro: { header: "'Anton', sans-serif", body: "'DM Sans', sans-serif" },
+  manuscrita: { header: "'Caveat', cursive", body: "'Nunito', sans-serif" },
+  clasica: { header: "Georgia, serif", body: "system-ui, sans-serif" },
+};
+const APARIENCIA_DEFAULT = {
+  fondo: '#f5eef2', tarjeta: '#ffe3ec', acento: '#e5507a',
+  texto: '#2b2b2b', textoAuto: true, llevado: '#8ecae6',
+  simbolo: 'check', fuente: 'conejito', mascotaImg: null,
+  stickersCustom: []
+};
 
-function cargarEstado() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
+function cargarJSON(key, def) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : def; }
+  catch(e){ return def; }
 }
+let estado = cargarJSON(STORAGE_KEY, {});
+let apariencia = {...APARIENCIA_DEFAULT, ...cargarJSON(APARIENCIA_KEY, {})};
 
-let estado = cargarEstado(); // { [id]: {completado: bool, creditos: number|null, nota: number|null} }
-
-function guardarEstado() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
-}
+function guardarEstado(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(estado)); }
+function guardarApariencia(){ localStorage.setItem(APARIENCIA_KEY, JSON.stringify(apariencia)); }
 
 function getInfo(id) {
-  if (!estado[id]) estado[id] = {completado:false, creditos:null, nota:null};
+  if (!estado[id]) estado[id] = { llevado:false, creditos:null, vecesLlevado:1, fase1:null, fase2:null, fase3:null, sticker:null, apuntes:'' };
+  if (estado[id].apuntes === undefined) estado[id].apuntes = '';
   return estado[id];
 }
 
-// ---------- RENDER ----------
+function calcularNotaFinal(curso, info) {
+  if ([info.fase1, info.fase2, info.fase3].some(v => v === null || v === undefined || isNaN(v))) return null;
+  if (curso.esProyecto) return (info.fase1*1 + info.fase2*2 + info.fase3*3) / 6;
+  return (info.fase1 + info.fase2 + info.fase3) / 3;
+}
+
+// ============================================================
+// APARIENCIA
+// ============================================================
+function contraste(hex) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  const luminancia = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return luminancia > 0.55 ? '#222222' : '#f5f5f5';
+}
+
+function aplicarApariencia() {
+  if (apariencia.textoAuto) apariencia.texto = contraste(apariencia.fondo);
+  const raiz = document.documentElement.style;
+  raiz.setProperty('--color-fondo', apariencia.fondo);
+  raiz.setProperty('--color-tarjeta', apariencia.tarjeta);
+  raiz.setProperty('--color-acento', apariencia.acento);
+  raiz.setProperty('--color-texto', apariencia.texto);
+  raiz.setProperty('--color-texto-tarjeta', contraste(apariencia.tarjeta));
+  raiz.setProperty('--color-llevado', apariencia.llevado);
+  raiz.setProperty('--fuente-header', FUENTES[apariencia.fuente].header);
+  raiz.setProperty('--fuente-body', FUENTES[apariencia.fuente].body);
+
+  document.getElementById('color-fondo').value = apariencia.fondo;
+  document.getElementById('color-tarjeta').value = apariencia.tarjeta;
+  document.getElementById('color-acento').value = apariencia.acento;
+  document.getElementById('color-texto').value = apariencia.texto;
+  document.getElementById('color-texto').disabled = apariencia.textoAuto;
+  document.getElementById('texto-auto').checked = apariencia.textoAuto;
+  document.getElementById('color-llevado').value = apariencia.llevado;
+  document.getElementById('select-fuente').value = apariencia.fuente;
+
+  document.querySelectorAll('.simbolos-elegir button').forEach(b => {
+    b.classList.toggle('elegido', b.dataset.key === apariencia.simbolo);
+  });
+
+  renderMascota();
+}
+
+// Selector de símbolos
+const contSimbolos = document.getElementById('simbolos-elegir');
+Object.entries(SIMBOLOS).forEach(([key, svg]) => {
+  const b = document.createElement('button');
+  b.innerHTML = svg;
+  b.dataset.key = key;
+  b.addEventListener('click', () => { apariencia.simbolo = key; guardarApariencia(); aplicarApariencia(); actualizarTodo(); });
+  contSimbolos.appendChild(b);
+});
+
+document.getElementById('btn-ajustes').addEventListener('click', () => document.getElementById('panel-ajustes').classList.toggle('abierto'));
+document.getElementById('color-fondo').addEventListener('input', e => { apariencia.fondo = e.target.value; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('color-tarjeta').addEventListener('input', e => { apariencia.tarjeta = e.target.value; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('color-acento').addEventListener('input', e => { apariencia.acento = e.target.value; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('color-texto').addEventListener('input', e => { apariencia.texto = e.target.value; apariencia.textoAuto = false; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('texto-auto').addEventListener('change', e => { apariencia.textoAuto = e.target.checked; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('color-llevado').addEventListener('input', e => { apariencia.llevado = e.target.value; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('select-fuente').addEventListener('change', e => { apariencia.fuente = e.target.value; guardarApariencia(); aplicarApariencia(); });
+document.getElementById('restaurar-colores').addEventListener('click', () => { apariencia = {...APARIENCIA_DEFAULT}; guardarApariencia(); aplicarApariencia(); actualizarTodo(); });
+
+// Mascota (conejito con relleno según progreso, o imagen propia)
+function renderMascota() {
+  const wrap = document.getElementById('mascota-wrap');
+  const total = cursos.length;
+  const llevados = cursos.filter(c => getInfo(c.id).llevado).length;
+  const pct = total ? Math.round((llevados/total)*100) : 0;
+
+  if (apariencia.mascotaImg) {
+    wrap.innerHTML = `<img src="${apariencia.mascotaImg}" class="mascota-img" alt="Mascota">`;
+    return;
+  }
+  const conejo = `<svg viewBox="0 0 100 100"><ellipse cx="38" cy="22" rx="7" ry="18" transform="rotate(-12 38 22)"/><ellipse cx="62" cy="22" rx="7" ry="18" transform="rotate(12 62 22)"/><circle cx="50" cy="55" r="24"/><ellipse cx="50" cy="80" rx="20" ry="14"/></svg>`;
+  wrap.innerHTML = `
+    <svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="2.5" opacity="0.55">${conejo.replace('<svg viewBox="0 0 100 100">','').replace('</svg>','')}</svg>
+    <div class="mascota-fill-clip" style="clip-path: inset(${100-pct}% 0 0 0)">
+      <svg viewBox="0 0 100 100" fill="#fff">${conejo.replace('<svg viewBox="0 0 100 100">','').replace('</svg>','')}</svg>
+    </div>`;
+}
+
+document.getElementById('subir-mascota').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { apariencia.mascotaImg = reader.result; guardarApariencia(); renderMascota(); };
+  reader.readAsDataURL(file);
+});
+document.getElementById('quitar-mascota').addEventListener('click', () => { apariencia.mascotaImg = null; guardarApariencia(); renderMascota(); });
+
+document.getElementById('subir-sticker').addEventListener('change', e => {
+  const files = Array.from(e.target.files);
+  let pendientes = files.length;
+  if (!pendientes) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      apariencia.stickersCustom.push({ id: 'c'+Date.now()+Math.random().toString(36).slice(2,6), src: reader.result });
+      pendientes--;
+      if (pendientes === 0) { guardarApariencia(); if (cursoAbiertoId) renderStickers(getInfo(cursoAbiertoId)); }
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// Exportar / Importar progreso
+document.getElementById('exportar-progreso').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({estado, apariencia}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'malla-progreso.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importar-progreso-btn').addEventListener('click', () => document.getElementById('importar-progreso-input').click());
+document.getElementById('importar-progreso-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const datos = JSON.parse(reader.result);
+      if (datos.estado) { estado = datos.estado; guardarEstado(); }
+      if (datos.apariencia) { apariencia = {...APARIENCIA_DEFAULT, ...datos.apariencia}; guardarApariencia(); }
+      alert('Progreso importado con éxito.');
+      location.reload();
+    } catch(err) { alert('El archivo no tiene un formato válido.'); }
+  };
+  reader.readAsText(file);
+});
+
+// ============================================================
+// RENDER MALLA
+// ============================================================
 const cursosPorId = Object.fromEntries(cursos.map(c => [c.id, c]));
 const malla = document.getElementById('malla');
 const semestres = [...new Set(cursos.map(c => c.sem))].sort((a,b)=>a-b);
-
 const elementosPorId = {};
 
 semestres.forEach(s => {
   const div = document.createElement('div');
   div.className = 'semestre';
   const h = document.createElement('h2');
-  h.textContent = `Semestre ${s}`;
+  h.textContent = nombreSemestre(s);
   div.appendChild(h);
   const ul = document.createElement('ul');
 
@@ -355,131 +1170,364 @@ semestres.forEach(s => {
     check.className = 'check';
     nombreDiv.appendChild(check);
     const span = document.createElement('span');
+    span.className = 'nombre-txt';
     span.textContent = curso.nombre;
     nombreDiv.appendChild(span);
+    const stickerSpan = document.createElement('span');
+    stickerSpan.className = 'sticker-mini';
+    nombreDiv.appendChild(stickerSpan);
     card.appendChild(nombreDiv);
 
-    const campos = document.createElement('div');
-    campos.className = 'campos';
-    campos.innerHTML = `
-      <div class="campo-grupo">
-        <label>Créditos</label>
-        <input type="number" min="0" step="1" class="input-creditos">
-      </div>
-      <div class="campo-grupo">
-        <label>Nota</label>
-        <input type="number" min="0" max="20" step="0.1" class="input-nota">
-      </div>
-    `;
-    card.appendChild(campos);
+    const avisoBloqueo = document.createElement('div');
+    avisoBloqueo.className = 'aviso-bloqueo';
+    card.appendChild(avisoBloqueo);
 
-    const inputCreditos = campos.querySelector('.input-creditos');
-    const inputNota = campos.querySelector('.input-nota');
-
-    const info = getInfo(curso.id);
-    inputCreditos.value = info.creditos ?? '';
-    inputNota.value = info.nota ?? '';
-
-    inputCreditos.addEventListener('click', e => e.stopPropagation());
-    inputNota.addEventListener('click', e => e.stopPropagation());
-    inputCreditos.addEventListener('input', () => {
-      getInfo(curso.id).creditos = inputCreditos.value === '' ? null : parseFloat(inputCreditos.value);
-      guardarEstado();
-      actualizarResumen();
-    });
-    inputNota.addEventListener('input', () => {
-      getInfo(curso.id).nota = inputNota.value === '' ? null : parseFloat(inputNota.value);
-      guardarEstado();
-      actualizarResumen();
-    });
-
-    card.addEventListener('click', () => {
-      if (card.classList.contains('desactivado')) return;
-      const info = getInfo(curso.id);
-      info.completado = !info.completado;
-      guardarEstado();
-      actualizarTodo();
-    });
+    card.addEventListener('click', () => { if (!card.classList.contains('desactivado')) abrirPanel(curso.id); });
 
     li.appendChild(card);
     ul.appendChild(li);
-    elementosPorId[curso.id] = card;
+    elementosPorId[curso.id] = { li, card, stickerSpan, check, avisoBloqueo };
   });
 
   div.appendChild(ul);
   malla.appendChild(div);
 });
 
-// ---------- LÓGICA DE BLOQUEOS ----------
+// ============================================================
+// ESTADOS VISUALES
+// ============================================================
 function actualizarBloqueos() {
   cursos.forEach(curso => {
-    const card = elementosPorId[curso.id];
+    const { card, stickerSpan, check, avisoBloqueo } = elementosPorId[curso.id];
     const info = getInfo(curso.id);
-    let bloqueadoPrereq = false;
+    let bloqueadoPrereq = curso.prereq ? !getInfo(curso.prereq).llevado : false;
     let bloqueadoGrupo = false;
-
-    if (curso.prereq) {
-      const prereqInfo = getInfo(curso.prereq);
-      if (!prereqInfo.completado) bloqueadoPrereq = true;
+    if (curso.grupo && !info.llevado) {
+      bloqueadoGrupo = cursos.some(c => c.grupo === curso.grupo && c.id !== curso.id && getInfo(c.id).llevado);
     }
-
-    if (curso.grupo && !info.completado) {
-      const otroElegido = cursos.some(c => c.grupo === curso.grupo && c.id !== curso.id && getInfo(c.id).completado);
-      if (otroElegido) bloqueadoGrupo = true;
-    }
+    const notaFinal = calcularNotaFinal(curso, info);
+    const aprobado = info.llevado && notaFinal !== null && notaFinal >= NOTA_MINIMA;
+    const desaprobado = info.llevado && notaFinal !== null && notaFinal < NOTA_MINIMA;
+    const pendiente = info.llevado && notaFinal === null;
 
     card.classList.toggle('desactivado', bloqueadoPrereq || bloqueadoGrupo);
     card.classList.toggle('desactivado-prereq', bloqueadoPrereq);
     card.classList.toggle('desactivado-grupo', bloqueadoGrupo && !bloqueadoPrereq);
-    card.classList.toggle('completado', info.completado);
+    card.classList.toggle('aprobado', aprobado);
+    card.classList.toggle('desaprobado', desaprobado);
+    card.classList.toggle('pendiente', pendiente);
+
+    avisoBloqueo.innerHTML = bloqueadoPrereq
+      ? ICONOS.lock + ' requiere prerequisito'
+      : (bloqueadoGrupo ? '— elegiste otro electivo de este bloque' : '');
+
+    check.innerHTML = info.llevado ? SIMBOLOS[apariencia.simbolo] : '';
+
+    stickerSpan.innerHTML = '';
+    if (desaprobado && info.sticker) {
+      if (info.sticker.tipo === 'builtin') stickerSpan.innerHTML = STICKERS_BUILTIN[info.sticker.key] || '';
+      else if (info.sticker.tipo === 'custom') {
+        const s = apariencia.stickersCustom.find(x => x.id === info.sticker.key);
+        if (s) stickerSpan.innerHTML = `<img src="${s.src}">`;
+      }
+    }
   });
 }
 
-// ---------- RESUMEN (progreso, créditos, promedio) ----------
-function actualizarResumen() {
+// ============================================================
+// RESUMEN, LISTAS, GRÁFICO, RUTA, DISPONIBLES, INSIGNIAS
+// ============================================================
+function datosPorCurso() {
+  return cursos.map(c => ({ c, info: getInfo(c.id), notaFinal: calcularNotaFinal(c, getInfo(c.id)) }));
+}
+
+function actualizarResumen(datos) {
   const total = cursos.length;
-  const completados = cursos.filter(c => getInfo(c.id).completado).length;
-  const porcentaje = total ? Math.round((completados / total) * 100) : 0;
+  const llevados = datos.filter(d => d.info.llevado).length;
+  const porcentaje = total ? Math.round((llevados/total)*100) : 0;
 
-  document.getElementById('progreso-texto').textContent =
-    `Progreso: ${porcentaje}% (${completados}/${total} cursos completados)`;
+  document.getElementById('progreso-texto').textContent = `Progreso: ${porcentaje}% (${llevados}/${total} cursos llevados)`;
   document.getElementById('barra-relleno').style.width = `${porcentaje}%`;
-  document.getElementById('dato-restantes').textContent = total - completados;
+  document.getElementById('dato-restantes').textContent = total - llevados;
 
-  let sumaCreditos = 0;
-  let sumaPonderada = 0;
-  let creditosConNota = 0;
-
-  cursos.forEach(c => {
-    const info = getInfo(c.id);
-    if (info.completado && info.creditos) {
-      sumaCreditos += info.creditos;
-      if (info.nota !== null && !isNaN(info.nota)) {
-        sumaPonderada += info.creditos * info.nota;
-        creditosConNota += info.creditos;
-      }
+  let sumaCreditos = 0, sumaPonderada = 0, creditosConNota = 0;
+  const aprobados = [], desaprobados = [];
+  datos.forEach(({c, info, notaFinal}) => {
+    if (!info.llevado) return;
+    if (info.creditos) sumaCreditos += info.creditos;
+    if (notaFinal !== null) {
+      if (info.creditos) { sumaPonderada += info.creditos * notaFinal; creditosConNota += info.creditos; }
+      if (notaFinal >= NOTA_MINIMA) aprobados.push({c, notaFinal});
+      else desaprobados.push({c, notaFinal, sticker: info.sticker});
     }
   });
 
   document.getElementById('dato-creditos').textContent = sumaCreditos;
-  document.getElementById('dato-promedio').textContent =
-    creditosConNota > 0 ? (sumaPonderada / creditosConNota).toFixed(2) : '--';
+  document.getElementById('dato-promedio').textContent = creditosConNota > 0 ? (sumaPonderada/creditosConNota).toFixed(2) : '--';
+
+  document.getElementById('lista-aprobados').innerHTML = aprobados.length
+    ? aprobados.map(x => `<li><span>${x.c.nombre}</span><span class="badge-nota">${x.notaFinal.toFixed(1)}</span></li>`).join('')
+    : '<li class="vacio">Aún no tienes cursos aprobados registrados</li>';
+
+  document.getElementById('lista-desaprobados').innerHTML = desaprobados.length
+    ? desaprobados.map(x => {
+        let icono = '';
+        if (x.sticker?.tipo === 'builtin') icono = STICKERS_BUILTIN[x.sticker.key] || '';
+        else if (x.sticker?.tipo === 'custom') { const s = apariencia.stickersCustom.find(st=>st.id===x.sticker.key); if (s) icono = `<img src="${s.src}" style="width:16px;height:16px;border-radius:3px;object-fit:cover">`; }
+        return `<li><span style="display:flex;align-items:center;gap:5px">${icono}${x.c.nombre}</span><span class="badge-nota">${x.notaFinal.toFixed(1)}</span></li>`;
+      }).join('')
+    : '<li class="vacio">Ningún curso desaprobado por aquí</li>';
+
+  return { aprobados, desaprobados, llevados, porcentaje };
+}
+
+function actualizarGraficoCreditos(datos) {
+  const cont = document.getElementById('grafico-creditos');
+  const porSem = {};
+  semestres.forEach(s => porSem[s] = 0);
+  datos.forEach(({c, info}) => { if (info.llevado && info.creditos) porSem[c.sem] += info.creditos; });
+
+  const maxEscala = Math.max(MAX_CREDITOS_SEM, ...Object.values(porSem));
+  cont.innerHTML = `<div class="linea-limite" style="bottom:${(MAX_CREDITOS_SEM/maxEscala*100)}%">20</div>` +
+    semestres.map(s => {
+      const creditos = porSem[s];
+      const alturaPct = maxEscala ? (creditos/maxEscala*100) : 0;
+      const excedido = creditos > MAX_CREDITOS_SEM;
+      return `<div class="barra-sem">
+        <div class="num">${creditos || ''}</div>
+        <div class="barra ${excedido?'excedido':''}" style="height:${Math.max(alturaPct,2)}%"></div>
+        <div>${s}°</div>
+      </div>`;
+    }).join('');
+}
+
+function actualizarRutaEgreso(datos) {
+  const cont = document.getElementById('ruta-egreso-contenido');
+  const conCreditos = datos.every(d => d.info.creditos !== null && d.info.creditos !== undefined && d.info.creditos !== '');
+  if (!conCreditos) {
+    cont.innerHTML = `<p class="nota-cursiva" style="margin:0">Completa el campo "Créditos" de todos los cursos (aunque aún no los lleves) para calcular tu ruta estimada de egreso.</p>`;
+    return;
+  }
+  const totalMalla = datos.reduce((s,d)=>s+(d.info.creditos||0), 0);
+  const aprobados = datos.filter(d => d.info.llevado && d.notaFinal !== null && d.notaFinal >= NOTA_MINIMA);
+  const creditosAprobados = aprobados.reduce((s,d)=>s+(d.info.creditos||0),0);
+  const faltantes = Math.max(totalMalla - creditosAprobados, 0);
+  const semestresFaltantes = Math.ceil(faltantes / MAX_CREDITOS_SEM);
+  cont.innerHTML = `
+    <div class="valor-grande">${semestresFaltantes}</div>
+    <p style="margin:2px 0 0">semestre${semestresFaltantes===1?'':'s'} más aprox., llevando el máximo de ${MAX_CREDITOS_SEM} créditos por semestre</p>
+    <p class="nota-cursiva" style="margin:6px 0 0">${faltantes} créditos aprobados de ${totalMalla} totales de la malla.</p>
+  `;
+}
+
+function actualizarDisponibles() {
+  const cont = document.getElementById('cursos-disponibles');
+  const disponibles = cursos.filter(c => {
+    const info = getInfo(c.id);
+    if (info.llevado) return false;
+    if (c.prereq && !getInfo(c.prereq).llevado) return false;
+    if (c.grupo && cursos.some(x => x.grupo===c.grupo && x.id!==c.id && getInfo(x.id).llevado)) return false;
+    return true;
+  });
+  if (!disponibles.length) { cont.innerHTML = '<p class="nota-cursiva" style="margin:0">No hay cursos nuevos disponibles por ahora.</p>'; return; }
+
+  const porSem = {};
+  disponibles.forEach(c => { (porSem[c.sem] = porSem[c.sem]||[]).push(c); });
+
+  cont.innerHTML = Object.keys(porSem).sort((a,b)=>a-b).map(s => {
+    const lista = porSem[s];
+    const suma = lista.reduce((acc,c)=>acc+(getInfo(c.id).creditos||0),0);
+    const excede = suma > MAX_CREDITOS_SEM;
+    return `<div class="bloque-disponible">
+      <h4>${nombreSemestre(s)}</h4>
+      <ul>${lista.map(c=>`<li><span>${c.nombre}</span><span>${getInfo(c.id).creditos ?? '—'} cr.</span></li>`).join('')}</ul>
+      ${suma ? `<div class="aviso-exceso" style="${excede?'':'opacity:.6'}">Suma: ${suma} créditos${excede?' — supera tu tope de 20 en un mismo semestre':''}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function actualizarInsignias(resumenInfo) {
+  const cont = document.getElementById('insignias');
+  const electivosCompletos = GRUPOS_ELECTIVOS.every(g => cursos.some(c => c.grupo===g && getInfo(c.id).llevado));
+  const sinDesaprobados = resumenInfo.llevados > 0 && resumenInfo.desaprobados.length === 0;
+
+  const badges = [
+    { id:'p25', icono:ICONOS.star, lograda: resumenInfo.porcentaje>=25, titulo:'25% completado' },
+    { id:'p50', icono:ICONOS.star, lograda: resumenInfo.porcentaje>=50, titulo:'50% completado' },
+    { id:'p75', icono:ICONOS.star, lograda: resumenInfo.porcentaje>=75, titulo:'75% completado' },
+    { id:'p100', icono:ICONOS.cap, lograda: resumenInfo.porcentaje>=100, titulo:'¡Malla completa!' },
+    { id:'electivos', icono:ICONOS.layers, lograda: electivosCompletos, titulo:'Todos los electivos elegidos' },
+    { id:'limpio', icono:ICONOS.shield, lograda: sinDesaprobados, titulo:'Cero cursos desaprobados' },
+  ];
+  cont.innerHTML = badges.map(b => `<div class="insignia ${b.lograda?'lograda':''}" title="${b.titulo}">${b.icono}</div>`).join('');
+}
+
+function actualizarTablaImprimir(datos) {
+  const body = document.getElementById('tabla-imprimir-body');
+  body.innerHTML = datos.map(({c, info, notaFinal}) => {
+    let estadoTxt = 'No llevado';
+    if (info.llevado) {
+      if (notaFinal === null) estadoTxt = 'Llevado (sin nota)';
+      else estadoTxt = notaFinal >= NOTA_MINIMA ? 'Aprobado' : 'Desaprobado';
+    }
+    return `<tr><td>${nombreSemestre(c.sem)}</td><td>${c.nombre}</td><td>${estadoTxt}</td><td>${notaFinal!==null?notaFinal.toFixed(2):'—'}</td><td>${info.creditos ?? '—'}</td></tr>`;
+  }).join('');
 }
 
 function actualizarTodo() {
   actualizarBloqueos();
-  actualizarResumen();
+  const datos = datosPorCurso();
+  const resumenInfo = actualizarResumen(datos);
+  actualizarGraficoCreditos(datos);
+  actualizarRutaEgreso(datos);
+  actualizarDisponibles();
+  actualizarInsignias(resumenInfo);
+  actualizarTablaImprimir(datos);
+  renderMascota();
 }
 
 document.getElementById('reiniciar').addEventListener('click', () => {
   if (confirm('¿Seguro que quieres borrar todo tu progreso guardado? Esta acción no se puede deshacer.')) {
     estado = {};
     localStorage.removeItem(STORAGE_KEY);
-    document.querySelectorAll('.input-creditos, .input-nota').forEach(i => i.value = '');
     actualizarTodo();
   }
 });
 
+document.getElementById('btn-imprimir').addEventListener('click', () => { window.print(); });
+
+document.getElementById('buscador').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  cursos.forEach(c => {
+    const { li } = elementosPorId[c.id];
+    li.style.display = c.nombre.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+
+// ============================================================
+// PANEL LATERAL
+// ============================================================
+const panel = document.getElementById('panel-detalle');
+const fondoPanel = document.getElementById('fondo-panel');
+let cursoAbiertoId = null;
+
+function abrirPanel(id) {
+  cursoAbiertoId = id;
+  const curso = cursosPorId[id];
+  const info = getInfo(id);
+
+  document.getElementById('panel-nombre').textContent = curso.nombre;
+  document.getElementById('panel-prereq').textContent = curso.prereq ? `Prerequisito: ${cursosPorId[curso.prereq].nombre}` : 'Sin prerequisito';
+  document.getElementById('panel-llevado').checked = info.llevado;
+  document.getElementById('panel-creditos').value = info.creditos ?? '';
+  document.getElementById('panel-veces-valor').textContent = info.vecesLlevado ?? 1;
+  document.getElementById('panel-fase1').value = info.fase1 ?? '';
+  document.getElementById('panel-fase2').value = info.fase2 ?? '';
+  document.getElementById('panel-fase3').value = info.fase3 ?? '';
+  document.getElementById('panel-apuntes').value = info.apuntes ?? '';
+
+  document.getElementById('label-fase1').textContent = curso.esProyecto ? 'Fase 1 (peso 1)' : 'Fase 1';
+  document.getElementById('label-fase2').textContent = curso.esProyecto ? 'Fase 2 (peso 2)' : 'Fase 2';
+  document.getElementById('label-fase3').textContent = curso.esProyecto ? 'Fase 3 (peso 3)' : 'Fase 3';
+  document.getElementById('panel-formula').textContent = curso.esProyecto ? 'Promedio ponderado: (F1×1 + F2×2 + F3×3) / 6' : 'Promedio simple de las 3 fases';
+
+  renderStickers(info);
+  actualizarPanelCalculado();
+  panel.classList.add('abierto');
+  fondoPanel.classList.add('abierto');
+}
+
+function cerrarPanel() { panel.classList.remove('abierto'); fondoPanel.classList.remove('abierto'); cursoAbiertoId = null; }
+document.getElementById('cerrar-panel').addEventListener('click', cerrarPanel);
+fondoPanel.addEventListener('click', cerrarPanel);
+
+function renderStickers(info) {
+  const cont = document.getElementById('panel-stickers');
+  cont.innerHTML = '';
+  Object.entries(STICKERS_BUILTIN).forEach(([key, svg]) => {
+    const b = document.createElement('button');
+    b.innerHTML = svg;
+    if (info.sticker?.tipo==='builtin' && info.sticker.key===key) b.classList.add('elegido');
+    b.addEventListener('click', () => {
+      info.sticker = (info.sticker?.tipo==='builtin' && info.sticker.key===key) ? null : {tipo:'builtin', key};
+      guardarEstado(); renderStickers(info); actualizarTodo();
+    });
+    cont.appendChild(b);
+  });
+  apariencia.stickersCustom.forEach(s => {
+    const b = document.createElement('button');
+    b.innerHTML = `<img src="${s.src}">`;
+    if (info.sticker?.tipo==='custom' && info.sticker.key===s.id) b.classList.add('elegido');
+    b.addEventListener('click', () => {
+      info.sticker = (info.sticker?.tipo==='custom' && info.sticker.key===s.id) ? null : {tipo:'custom', key:s.id};
+      guardarEstado(); renderStickers(info); actualizarTodo();
+    });
+    cont.appendChild(b);
+  });
+}
+
+function actualizarPanelCalculado() {
+  if (!cursoAbiertoId) return;
+  const curso = cursosPorId[cursoAbiertoId];
+  const info = getInfo(cursoAbiertoId);
+  const notaFinal = calcularNotaFinal(curso, info);
+  const box = document.getElementById('panel-notafinal-box');
+  document.getElementById('panel-notafinal-valor').textContent = notaFinal !== null ? notaFinal.toFixed(2) : '--';
+  const aprobado = notaFinal !== null && notaFinal >= NOTA_MINIMA;
+  const desaprobado = notaFinal !== null && notaFinal < NOTA_MINIMA;
+  box.classList.toggle('aprobado', aprobado);
+  box.classList.toggle('desaprobado', desaprobado);
+  document.getElementById('panel-aviso').style.display = (info.llevado && desaprobado) ? 'block' : 'none';
+}
+
+document.getElementById('panel-llevado').addEventListener('change', (e) => {
+  const curso = cursosPorId[cursoAbiertoId];
+  const info = getInfo(cursoAbiertoId);
+  if (e.target.checked && curso.grupo) {
+    const otro = cursos.find(c => c.grupo===curso.grupo && c.id!==curso.id && getInfo(c.id).llevado);
+    if (otro) { alert(`Ya elegiste "${otro.nombre}" como electivo de este bloque. Desmárcalo primero si quieres cambiarlo.`); e.target.checked = false; return; }
+  }
+  info.llevado = e.target.checked;
+  guardarEstado(); actualizarPanelCalculado(); actualizarTodo();
+});
+
+document.getElementById('panel-creditos').addEventListener('input', (e) => {
+  const info = getInfo(cursoAbiertoId);
+  info.creditos = e.target.value === '' ? null : parseFloat(e.target.value);
+  guardarEstado(); actualizarTodo();
+});
+
+document.getElementById('panel-apuntes').addEventListener('input', (e) => {
+  const info = getInfo(cursoAbiertoId);
+  info.apuntes = e.target.value;
+  guardarEstado();
+});
+
+['fase1','fase2','fase3'].forEach(campo => {
+  document.getElementById('panel-'+campo).addEventListener('input', (e) => {
+    const info = getInfo(cursoAbiertoId);
+    info[campo] = e.target.value === '' ? null : parseFloat(e.target.value);
+    guardarEstado(); actualizarPanelCalculado(); actualizarTodo();
+  });
+});
+
+document.getElementById('panel-veces-mas').addEventListener('click', () => {
+  const info = getInfo(cursoAbiertoId);
+  info.vecesLlevado = (info.vecesLlevado ?? 1) + 1;
+  document.getElementById('panel-veces-valor').textContent = info.vecesLlevado;
+  guardarEstado();
+});
+document.getElementById('panel-veces-menos').addEventListener('click', () => {
+  const info = getInfo(cursoAbiertoId);
+  info.vecesLlevado = Math.max(1, (info.vecesLlevado ?? 1) - 1);
+  document.getElementById('panel-veces-valor').textContent = info.vecesLlevado;
+  guardarEstado();
+});
+
+// ============================================================
+// INICIO
+// ============================================================
+aplicarApariencia();
 actualizarTodo();
 </script>
 </body>
