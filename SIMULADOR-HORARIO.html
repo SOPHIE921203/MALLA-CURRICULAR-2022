@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Horario — Próximo Semestre</title>
+<style>
+  :root{
+    --paper:#f6f4ee;
+    --paper-line:#d9d4c4;
+    --ink:#1c2b3a;
+    --blue:#25476b;
+    --blue-deep:#132639;
+    --accent:#c1541f;
+    --danger:#b3261e;
+    --danger-bg:#fdeceb;
+    --ok:#3a6b4c;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+    background-size:24px 24px;
+    color:var(--ink);
+    font-family:'Courier New', ui-monospace, monospace;
+    padding:20px 16px 60px;
+  }
+  h1{
+    font-family:'Georgia', serif;
+    font-size:1.5rem;
+    letter-spacing:0.3px;
+    margin:0 0 2px;
+    color:var(--blue-deep);
+  }
+  .subtitle{
+    font-size:0.78rem;
+    color:#5a6b7a;
+    margin:0 0 18px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap:18px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:var(--card);
+    border:1.5px solid var(--blue-deep);
+    box-shadow:4px 4px 0 rgba(19,38,57,0.12);
+    padding:14px;
+  }
+  .course-group{
+    margin-bottom:16px;
+    padding-bottom:14px;
+    border-bottom:1px dashed #c8c2ae;
+  }
+  .course-group:last-child{border-bottom:none;margin-bottom:0;}
+  .course-title{
+    font-family:'Georgia', serif;
+    font-size:0.92rem;
+    font-weight:bold;
+    color:var(--blue-deep);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .swatch{
+    width:11px;height:11px;
+    border:1px solid var(--blue-deep);
+    display:inline-block;
+    flex-shrink:0;
+  }
+  .course-sub{
+    font-size:0.68rem;
+    color:#7a7462;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    margin:0 0 6px 17px;
+  }
+  .option{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:5px 6px;
+    margin:2px 0;
+    cursor:pointer;
+    font-size:0.76rem;
+    line-height:1.35;
+    border:1px solid transparent;
+  }
+  .option:hover{background:#f1efe6;}
+  .option input{margin-top:3px;accent-color:var(--blue);flex-shrink:0;}
+  .option .opt-label{font-weight:bold;color:var(--blue-deep);}
+  .option .opt-meta{color:#5a6b7a;display:block;}
+  .option.selected{background:#eef2ea;border-color:var(--ok);}
+  .por-asignar{color:var(--accent);font-style:italic;}
+  .clear-btn{
+    font-size:0.65rem;
+    color:var(--accent);
+    text-decoration:underline;
+    cursor:pointer;
+    margin:2px 0 0 17px;
+    display:inline-block;
+    background:none;border:none;padding:0;
+    font-family:inherit;
+  }
+  .warning-banner{
+    background:var(--danger-bg);
+    border:1.5px solid var(--danger);
+    color:var(--danger);
+    padding:10px 14px;
+    font-size:0.8rem;
+    margin-bottom:14px;
+    display:none;
+    line-height:1.5;
+  }
+  .warning-banner.show{display:block;}
+  .warning-banner strong{display:block;margin-bottom:4px;font-size:0.82rem;}
+  .no-conflict{
+    background:#eef2ea;
+    border:1.5px solid var(--ok);
+    color:var(--ok);
+    padding:8px 14px;
+    font-size:0.78rem;
+    margin-bottom:14px;
+  }
+  .grid-wrap{overflow-x:auto;}
+  .schedule{
+    position:relative;
+    display:grid;
+    grid-template-columns: 52px repeat(6, minmax(110px,1fr));
+    border:1.5px solid var(--blue-deep);
+    min-width:760px;
+  }
+  .day-head{
+    background:var(--blue-deep);
+    color:#f1ede2;
+    text-align:center;
+    font-size:0.72rem;
+    letter-spacing:1px;
+    padding:8px 4px;
+    border-left:1px solid #3c5674;
+  }
+  .day-head.corner{background:var(--paper);border-left:none;}
+  .hour-col{
+    position:relative;
+    border-left:1px solid #d9d4c4;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 49px,
+      #e4e0d2 49px,
+      #e4e0d2 50px
+    );
+  }
+  .hour-labels{position:relative;}
+  .hour-label{
+    position:absolute;
+    right:6px;
+    transform:translateY(-50%);
+    font-size:0.62rem;
+    color:#7a7462;
+  }
+  .block{
+    position:absolute;
+    left:2px;right:2px;
+    border-radius:2px;
+    padding:4px 5px;
+    font-size:0.62rem;
+    line-height:1.25;
+    color:#fff;
+    overflow:hidden;
+    box-shadow:1px 1px 0 rgba(0,0,0,0.15);
+    border:1px solid rgba(0,0,0,0.2);
+  }
+  .block.conflict{
+    outline:2px solid var(--danger);
+    outline-offset:-2px;
+    animation:pulse 1.4s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:1px 1px 0 rgba(0,0,0,0.15);}
+    50%{box-shadow:0 0 0 3px rgba(179,38,30,0.35);}
+  }
+  .block strong{display:block;font-size:0.66rem;}
+  .footer-note{
+    font-size:0.68rem;
+    color:#8a8474;
+    margin-top:14px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Simulador de horario — próximo semestre</h1>
+<p class="subtitle">Elige una opción por curso · los cruces se marcan en rojo</p>
+
+<div class="layout">
+
+  <div class="panel" id="course-panel"></div>
+
+  <div>
+    <div id="warning-banner" class="warning-banner"></div>
+    <div id="no-conflict" class="no-conflict" style="display:none;">✓ Sin cruces de horario con la selección actual.</div>
+    <div class="panel grid-wrap">
+      <div class="schedule" id="schedule"></div>
+    </div>
+    <p class="footer-note">
+      Las secciones/grupos con docente "POR ASIGNAR" están incluidas porque, según lo indicado, el horario ya está definido aunque falte confirmar al docente.
+      La selección se guarda automáticamente en este navegador.
+    </p>
+  </div>
+
+</div>
+
+<script>
+const DAYS = ["LUN","MAR","MIE","JUE","VIE","SAB"];
+const DAY_NAMES = {LUN:"Lunes",MAR:"Martes",MIE:"Miércoles",JUE:"Jueves",VIE:"Viernes",SAB:"Sábado"};
+const START_HOUR = 7;   // 7:00
+const END_HOUR = 21.5;  // 21:30
+const PX_PER_MIN = 50/60;
+
+function t(str){ // "7:15" -> minutes
+  const [h,m] = str.split(":").map(Number);
+  return h*60+m;
+}
+
+const COLORS = ["#25476b","#8a4b2b","#3a6b4c","#6b3a6b","#a1461f","#2f6b6b"];
+
+const courseGroups = [
+  {
+    id:"constr2-teo", course:"Construcción II", label:"Teoría", color:COLORS[0],
+    options:[
+      {id:"A", docente:"Damiani Lazo, M.", ambiente:"CH-403", sessions:[{day:"VIE",start:"7:15",end:"9:30"}]},
+      {id:"B", docente:"Damiani Lazo, M.", ambiente:"CH-403", sessions:[{day:"VIE",start:"9:30",end:"11:45"}]},
+    ]
+  },
+  {
+    id:"constr2-prac", course:"Construcción II", label:"Práctica", color:COLORS[0],
+    options:[
+      {id:"1", docente:"Damiani Lazo, M.", ambiente:"V-202", sessions:[{day:"LUN",start:"8:00",end:"11:00"},{day:"MIE",start:"8:00",end:"11:00"}]},
+      {id:"2", docente:"Damiani Lazo, M.", ambiente:"V-202", sessions:[{day:"MAR",start:"8:00",end:"11:00"},{day:"JUE",start:"8:00",end:"11:00"}]},
+      {id:"3", docente:"Damiani Lazo, M.", ambiente:"V-202", sessions:[{day:"LUN",start:"12:00",end:"15:00"},{day:"MIE",start:"12:00",end:"15:00"}]},
+      {id:"4", docente:"Damiani Lazo, M.", ambiente:"CH-401 / V-202", sessions:[{day:"SAB",start:"8:00",end:"11:00"},{day:"JUE",start:"12:00",end:"15:00"}]},
+      {id:"5", docente:"Marquez Arrisueño, V.", ambiente:"V-201 / V-203", sessions:[{day:"MIE",start:"12:00",end:"15:00"},{day:"VIE",start:"12:00",end:"15:00"}]},
+      {id:"6", docente:"Pinto Rojas, G.", ambiente:"V-203", sessions:[{day:"LUN",start:"8:00",end:"11:00"},{day:"MIE",start:"8:00",end:"11:00"}]},
+      {id:"7", docente:"Gonzales Flores, J.", ambiente:"V-203", sessions:[{day:"LUN",start:"12:00",end:"15:00"},{day:"MIE",start:"12:00",end:"15:00"}]},
+      {id:"8", docente:"Gonzales Flores, J.", ambiente:"V-201", sessions:[{day:"LUN",start:"8:00",end:"11:00"},{day:"MIE",start:"8:00",end:"11:00"}]},
+      {id:"9", docente:"Pacheco Chambi, R.", ambiente:"V-201", sessions:[{day:"MAR",start:"13:00",end:"16:00"},{day:"JUE",start:"13:00",end:"16:00"}]},
+      {id:"10", docente:"Pacheco Chambi, R.", ambiente:"CH-403 / V-201", sessions:[{day:"SAB",start:"8:00",end:"11:00"},{day:"VIE",start:"13:00",end:"16:00"}]},
+      {id:"11", docente:"POR ASIGNAR", ambiente:"V-201 / V-204", sessions:[{day:"LUN",start:"12:00",end:"15:00"},{day:"MIE",start:"12:00",end:"15:00"}]},
+    ]
+  },
+  {
+    id:"proy4-prac", course:"Proyectos IV: Habitar la Vivienda", label:"Práctica", color:COLORS[1],
+    options:[
+      {id:"1", docente:"Valdivia Vilches, M.", ambiente:"V-305 A", sessions:[{day:"MAR",start:"7:00",end:"11:00"},{day:"VIE",start:"7:00",end:"11:00"}]},
+      {id:"2", docente:"Agramonte Cardenas, C.", ambiente:"V-304 A", sessions:[{day:"MAR",start:"7:00",end:"11:00"},{day:"VIE",start:"7:00",end:"11:00"}]},
+      {id:"3", docente:"Zuñiga Alfaro, A.", ambiente:"V-302 B", sessions:[{day:"MAR",start:"12:00",end:"16:00"},{day:"VIE",start:"12:00",end:"16:00"}]},
+      {id:"4", docente:"Zuñiga Alfaro, A.", ambiente:"V-302 B", sessions:[{day:"MAR",start:"7:00",end:"11:00"},{day:"VIE",start:"7:00",end:"11:00"}]},
+      {id:"5", docente:"Llanque Chana, J.", ambiente:"V-302 A", sessions:[{day:"MAR",start:"7:00",end:"11:00"},{day:"VIE",start:"7:00",end:"11:00"}]},
+      {id:"6", docente:"Fuentes Lopez, C.", ambiente:"V-305 A", sessions:[{day:"MAR",start:"12:00",end:"16:00"},{day:"VIE",start:"12:00",end:"16:00"}]},
+      {id:"7", docente:"Pinto Rojas, G.", ambiente:"V-305 B", sessions:[{day:"MIE",start:"12:00",end:"16:00"},{day:"VIE",start:"12:00",end:"16:00"}]},
+      {id:"8", docente:"Urday Luque, O.", ambiente:"V-302 A", sessions:[{day:"MAR",start:"17:00",end:"21:00"},{day:"VIE",start:"17:00",end:"21:00"}]},
+      {id:"9", docente:"Gonzales Flores, J.", ambiente:"V-302 A", sessions:[{day:"MAR",start:"12:00",end:"16:00"},{day:"VIE",start:"12:00",end:"16:00"}]},
+      {id:"10", docente:"Pinto Rojas, G.", ambiente:"V-302 B", sessions:[{day:"MAR",start:"17:00",end:"21:00"},{day:"VIE",start:"17:00",end:"21:00"}]},
+    ]
+  },
+  {
+    id:"gestion-teo", course:"Gestión de Proyectos", label:"Teoría", color:COLORS[2],
+    options:[
+      {id:"A", docente:"Seminario Benites, A.", ambiente:"AV-1-AV", sessions:[{day:"LUN",start:"18:30",end:"20:00"},{day:"MIE",start:"18:30",end:"20:00"}]},
+      {id:"B", docente:"Seminario Benites, A.", ambiente:"AV-1-AV", sessions:[{day:"LUN",start:"20:00",end:"21:30"},{day:"MIE",start:"20:00",end:"21:30"}]},
+      {id:"C", docente:"POR ASIGNAR", ambiente:"AV-1-AV", sessions:[{day:"MAR",start:"18:30",end:"20:00"},{day:"JUE",start:"18:30",end:"20:00"}]},
+      {id:"D", docente:"POR ASIGNAR", ambiente:"AV-1-AV", sessions:[{day:"MAR",start:"20:00",end:"21:30"},{day:"JUE",start:"20:00",end:"21:30"}]},
+    ]
+  },
+  {
+    id:"thcu2-teo", course:"Teoría e Hist. Crítica del Urbanismo II", label:"Teoría", color:COLORS[3],
+    options:[
+      {id:"A", docente:"Calcino Caceres, M.", ambiente:"CH-501", sessions:[{day:"LUN",start:"15:30",end:"17:00"},{day:"MIE",start:"15:30",end:"17:00"}]},
+      {id:"B", docente:"Flores Gutierrez, R.", ambiente:"CH-501", sessions:[{day:"MAR",start:"14:30",end:"16:00"},{day:"JUE",start:"14:30",end:"16:00"}]},
+      {id:"C", docente:"Delgado Alvarado, G.", ambiente:"CH-501", sessions:[{day:"LUN",start:"12:00",end:"13:30"},{day:"MIE",start:"15:30",end:"17:00"}]},
+    ]
+  },
+  {
+    id:"tutoria", course:"Tutoría", label:"Semestre 8", color:COLORS[4],
+    options:[
+      {id:"A", docente:"POR ASIGNAR", ambiente:"CH-501", sessions:[{day:"MIE",start:"17:00",end:"17:45"}]},
+      {id:"B", docente:"POR ASIGNAR", ambiente:"CH-403", sessions:[{day:"VIE",start:"11:45",end:"12:30"}]},
+      {id:"C", docente:"POR ASIGNAR", ambiente:"D-105", sessions:[{day:"LUN",start:"11:15",end:"12:00"}]},
+    ]
+  },
+];
+
+const STORAGE_KEY = "horario-sim-selecciones";
+let selections = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+function saveSelections(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+}
+
+function renderPanel(){
+  const panel = document.getElementById("course-panel");
+  panel.innerHTML = "";
+  courseGroups.forEach(group=>{
+    const div = document.createElement("div");
+    div.className = "course-group";
+
+    const title = document.createElement("div");
+    title.className = "course-title";
+    title.innerHTML = `<span class="swatch" style="background:${group.color}"></span>${group.course}`;
+    div.appendChild(title);
+
+    const sub = document.createElement("div");
+    sub.className = "course-sub";
+    sub.textContent = group.label;
+    div.appendChild(sub);
+
+    group.options.forEach(opt=>{
+      const label = document.createElement("label");
+      label.className = "option" + (selections[group.id]===opt.id ? " selected":"");
+      const sessTxt = opt.sessions.map(s=>`${DAY_NAMES[s.day]} ${s.start}–${s.end}`).join(" · ");
+      const docenteTxt = opt.docente === "POR ASIGNAR" ? `<span class="por-asignar">Docente por asignar</span>` : opt.docente;
+      label.innerHTML = `
+        <input type="radio" name="${group.id}" value="${opt.id}" ${selections[group.id]===opt.id ? "checked":""}>
+        <span>
+          <span class="opt-label">${group.options.length>1 && !isNaN(opt.id) ? "Grupo "+opt.id : "Sección "+opt.id}</span>
+          <span class="opt-meta">${docenteTxt} · ${opt.ambiente}</span>
+          <span class="opt-meta">${sessTxt}</span>
+        </span>
+      `;
+      label.querySelector("input").addEventListener("change", ()=>{
+        selections[group.id] = opt.id;
+        saveSelections();
+        renderPanel();
+        renderSchedule();
+      });
+      div.appendChild(label);
+    });
+
+    if(selections[group.id]){
+      const clear = document.createElement("button");
+      clear.className = "clear-btn";
+      clear.textContent = "Quitar selección";
+      clear.addEventListener("click", ()=>{
+        delete selections[group.id];
+        saveSelections();
+        renderPanel();
+        renderSchedule();
+      });
+      div.appendChild(clear);
+    }
+
+    panel.appendChild(div);
+  });
+}
+
+function buildGridSkeleton(){
+  const schedule = document.getElementById("schedule");
+  schedule.innerHTML = "";
+
+  const totalMinutes = (END_HOUR-START_HOUR)*60;
+  const totalHeight = totalMinutes*PX_PER_MIN;
+
+  const corner = document.createElement("div");
+  corner.className = "day-head corner";
+  schedule.appendChild(corner);
+
+  DAYS.forEach(d=>{
+    const h = document.createElement("div");
+    h.className = "day-head";
+    h.textContent = DAY_NAMES[d];
+    schedule.appendChild(h);
+  });
+
+  const hourLabels = document.createElement("div");
+  hourLabels.className = "hour-labels";
+  hourLabels.style.height = totalHeight+"px";
+  for(let hr=Math.ceil(START_HOUR); hr<=Math.floor(END_HOUR); hr++){
+    const lbl = document.createElement("div");
+    lbl.className = "hour-label";
+    lbl.style.top = ((hr-START_HOUR)*60*PX_PER_MIN)+"px";
+    lbl.textContent = hr+":00";
+    hourLabels.appendChild(lbl);
+  }
+  schedule.appendChild(hourLabels);
+
+  DAYS.forEach(d=>{
+    const col = document.createElement("div");
+    col.className = "hour-col";
+    col.style.height = totalHeight+"px";
+    col.dataset.day = d;
+    schedule.appendChild(col);
+  });
+}
+
+function overlaps(a,b){
+  return a.startMin < b.endMin && b.startMin < a.endMin;
+}
+
+function renderSchedule(){
+  buildGridSkeleton();
+
+  // collect active sessions
+  let activeSessions = [];
+  courseGroups.forEach(group=>{
+    const chosenId = selections[group.id];
+    if(!chosenId) return;
+    const opt = group.options.find(o=>o.id===chosenId);
+    if(!opt) return;
+    opt.sessions.forEach(s=>{
+      activeSessions.push({
+        groupId: group.id,
+        courseLabel: group.course + (group.label ? " · "+group.label : ""),
+        optId: opt.id,
+        color: group.color,
+        day: s.day,
+        startMin: t(s.start),
+        endMin: t(s.end),
+        startStr: s.start,
+        endStr: s.end,
+        ambiente: opt.ambiente
+      });
+    });
+  });
+
+  // detect conflicts (different courses, same day, overlapping)
+  let conflicts = [];
+  for(let i=0;i<activeSessions.length;i++){
+    for(let j=i+1;j<activeSessions.length;j++){
+      const a = activeSessions[i], b = activeSessions[j];
+      if(a.groupId===b.groupId) continue;
+      if(a.day===b.day && overlaps(a,b)){
+        conflicts.push([a,b]);
+      }
+    }
+  }
+
+  const conflictKeys = new Set();
+  conflicts.forEach(([a,b])=>{
+    conflictKeys.add(a.groupId+a.day+a.startMin);
+    conflictKeys.add(b.groupId+b.day+b.startMin);
+  });
+
+  // render blocks
+  const schedule = document.getElementById("schedule");
+  DAYS.forEach(day=>{
+    const col = schedule.querySelector(`.hour-col[data-day="${day}"]`);
+    const sessionsOnDay = activeSessions.filter(s=>s.day===day);
+    sessionsOnDay.forEach((s, idx)=>{
+      const block = document.createElement("div");
+      const key = s.groupId+s.day+s.startMin;
+      block.className = "block" + (conflictKeys.has(key) ? " conflict":"");
+      block.style.background = s.color;
+      block.style.top = ((s.startMin-START_HOUR*60)*PX_PER_MIN)+"px";
+      block.style.height = ((s.endMin-s.startMin)*PX_PER_MIN)+"px";
+      block.innerHTML = `<strong>${s.courseLabel}</strong>${s.startStr}–${s.endStr}<br>${s.ambiente}`;
+      col.appendChild(block);
+    });
+  });
+
+  // warning banner
+  const banner = document.getElementById("warning-banner");
+  const noConflict = document.getElementById("no-conflict");
+  if(conflicts.length){
+    banner.classList.add("show");
+    noConflict.style.display = "none";
+    banner.innerHTML = "<strong>⚠ Cruce de horario detectado — no podrás matricular así:</strong>" +
+      conflicts.map(([a,b])=>
+        `${a.courseLabel} (${a.startStr}–${a.endStr}) se cruza con ${b.courseLabel} (${b.startStr}–${b.endStr}) el día ${DAY_NAMES[a.day]}.`
+      ).join("<br>");
+  } else {
+    banner.classList.remove("show");
+    if(activeSessions.length>0){
+      noConflict.style.display = "block";
+    } else {
+      noConflict.style.display = "none";
+    }
+  }
+}
+
+renderPanel();
+renderSchedule();
+</script>
+
+</body>
+</html>
