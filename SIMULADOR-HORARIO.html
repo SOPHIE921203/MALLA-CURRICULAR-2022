@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador de Horario — Próximo Semestre</title>
-  <a href="index.html" style="display:inline-block;margin:6px 0 14px;padding:8px 16px;background:var(--blue);color:#fff;text-decoration:none;border-radius:2px;font-size:0.8rem;">
-  ← Volver a la malla curricular
-</a>
 <style>
   :root{
     --paper:#f6f4ee;
@@ -32,6 +29,16 @@
     font-family:'Courier New', ui-monospace, monospace;
     padding:20px 16px 60px;
   }
+  .volver{
+    display:inline-block;
+    margin:0 0 14px;
+    padding:8px 16px;
+    background:var(--blue);
+    color:#fff;
+    text-decoration:none;
+    border-radius:2px;
+    font-size:0.8rem;
+  }
   h1{
     font-family:'Georgia', serif;
     font-size:1.5rem;
@@ -54,6 +61,12 @@
   }
   @media (max-width: 880px){
     .layout{grid-template-columns:1fr;}
+    .calendario-col{position:static;}
+  }
+  .calendario-col{
+    position:sticky;
+    top:16px;
+    align-self:start;
   }
   .panel{
     background:var(--card);
@@ -201,9 +214,113 @@
     margin-top:14px;
     line-height:1.5;
   }
+
+  .btn-agregar-curso{
+    display:block;
+    width:100%;
+    margin-top:6px;
+    padding:9px 10px;
+    background:var(--blue-deep);
+    color:#f1ede2;
+    border:none;
+    font-family:inherit;
+    font-size:0.76rem;
+    cursor:pointer;
+    letter-spacing:0.3px;
+  }
+  .btn-agregar-curso:hover{background:var(--blue);}
+
+  .form-curso{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:2px dashed #c8c2ae;
+  }
+  .form-curso label{
+    display:block;
+    font-size:0.66rem;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:#7a7462;
+    margin:8px 0 3px;
+  }
+  .form-curso input[type="text"],
+  .form-curso input[type="time"],
+  .form-curso select{
+    width:100%;
+    padding:6px 7px;
+    font-family:inherit;
+    font-size:0.76rem;
+    border:1px solid #c8c2ae;
+    background:#fff;
+    color:var(--ink);
+  }
+  .form-curso input[type="color"]{
+    width:44px;height:26px;border:1px solid #c8c2ae;padding:0;cursor:pointer;
+  }
+  .opcion-box{
+    border:1px solid #c8c2ae;
+    padding:8px;
+    margin-top:10px;
+    background:#faf8f2;
+  }
+  .opcion-box .cabecera-opcion{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.7rem;
+    font-weight:bold;
+    color:var(--blue-deep);
+  }
+  .sesion-row{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    margin-top:6px;
+  }
+  .sesion-row select{flex:1;}
+  .sesion-row input[type="time"]{flex:1;}
+  .mini-x{
+    background:none;border:none;color:var(--danger);cursor:pointer;
+    font-size:0.9rem;line-height:1;padding:2px 4px;
+  }
+  .btn-linea{
+    font-size:0.66rem;
+    color:var(--blue);
+    text-decoration:underline;
+    background:none;border:none;cursor:pointer;
+    font-family:inherit;
+    margin-top:6px;
+    padding:0;
+    display:inline-block;
+  }
+  .form-curso .acciones-form{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .form-curso .acciones-form button{
+    flex:1;
+    padding:8px;
+    font-family:inherit;
+    font-size:0.74rem;
+    cursor:pointer;
+    border:1px solid var(--blue-deep);
+  }
+  .btn-guardar-curso{background:var(--ok);color:#fff;border-color:var(--ok) !important;}
+  .btn-cancelar-curso{background:#fff;color:var(--ink);}
+  .eliminar-curso{
+    margin-left:auto;
+    font-size:0.62rem;
+    color:var(--danger);
+    text-decoration:underline;
+    background:none;border:none;cursor:pointer;
+    font-family:inherit;
+  }
 </style>
 </head>
 <body>
+
+<a href="index.html" class="volver">← Volver a la malla curricular</a>
 
 <h1>Simulador de horario — próximo semestre</h1>
 <p class="subtitle">Elige una opción por curso · los cruces se marcan en rojo</p>
@@ -212,7 +329,7 @@
 
   <div class="panel" id="course-panel"></div>
 
-  <div>
+  <div class="calendario-col">
     <div id="warning-banner" class="warning-banner"></div>
     <div id="no-conflict" class="no-conflict" style="display:none;">✓ Sin cruces de horario con la selección actual.</div>
     <div class="panel grid-wrap">
@@ -238,7 +355,7 @@ function t(str){ // "7:15" -> minutes
   return h*60+m;
 }
 
-const COLORS = ["#25476b","#8a4b2b","#3a6b4c","#6b3a6b","#a1461f","#2f6b6b"];
+const COLORS = ["#5c7ea3","#b06a44","#5c8a6e","#7d5a86","#b8863f","#3f7d7a"];
 
 const courseGroups = [
   {
@@ -307,10 +424,19 @@ const courseGroups = [
 ];
 
 const STORAGE_KEY = "horario-sim-selecciones";
+const CUSTOM_KEY = "horario-sim-cursos-personalizados";
 let selections = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+const BASE_COURSE_GROUPS = courseGroups;
+let customGroups = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
+courseGroups = BASE_COURSE_GROUPS.concat(customGroups);
 
 function saveSelections(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+}
+function saveCustomGroups(){
+  localStorage.setItem(CUSTOM_KEY, JSON.stringify(customGroups));
+  courseGroups = BASE_COURSE_GROUPS.concat(customGroups);
 }
 
 function renderPanel(){
@@ -323,6 +449,22 @@ function renderPanel(){
     const title = document.createElement("div");
     title.className = "course-title";
     title.innerHTML = `<span class="swatch" style="background:${group.color}"></span>${group.course}`;
+    if (group.custom) {
+      const del = document.createElement("button");
+      del.className = "eliminar-curso";
+      del.textContent = "eliminar";
+      del.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (!confirm(`¿Eliminar "${group.course}" de la lista?`)) return;
+        customGroups = customGroups.filter(g => g.id !== group.id);
+        delete selections[group.id];
+        saveCustomGroups();
+        saveSelections();
+        renderPanel();
+        renderSchedule();
+      });
+      title.appendChild(del);
+    }
     div.appendChild(title);
 
     const sub = document.createElement("div");
@@ -366,6 +508,121 @@ function renderPanel(){
     }
 
     panel.appendChild(div);
+  });
+
+  const btnAgregar = document.createElement("button");
+  btnAgregar.className = "btn-agregar-curso";
+  btnAgregar.textContent = "+ Agregar curso / horario / aula para próximo semestre";
+  btnAgregar.addEventListener("click", () => renderFormularioNuevoCurso(panel, btnAgregar));
+  panel.appendChild(btnAgregar);
+}
+
+function crearFilaSesion(cont){
+  const row = document.createElement("div");
+  row.className = "sesion-row";
+  row.innerHTML = `
+    <select class="f-dia">
+      ${DAYS.map(d=>`<option value="${d}">${DAY_NAMES[d]}</option>`).join("")}
+    </select>
+    <input type="time" class="f-inicio" value="08:00">
+    <input type="time" class="f-fin" value="10:00">
+    <button type="button" class="mini-x" title="Quitar sesión">×</button>
+  `;
+  row.querySelector(".mini-x").addEventListener("click", () => row.remove());
+  cont.appendChild(row);
+}
+
+function crearFilaOpcion(cont, numero){
+  const box = document.createElement("div");
+  box.className = "opcion-box";
+  box.innerHTML = `
+    <div class="cabecera-opcion">
+      <span>Opción/Grupo ${numero}</span>
+      <button type="button" class="mini-x" title="Quitar opción">×</button>
+    </div>
+    <label>Docente</label>
+    <input type="text" class="f-docente" placeholder="Nombre del docente o 'POR ASIGNAR'">
+    <label>Ambiente</label>
+    <input type="text" class="f-ambiente" placeholder="Ej. V-202">
+    <div class="f-sesiones"></div>
+    <button type="button" class="btn-linea f-add-sesion">+ agregar sesión (día/hora)</button>
+  `;
+  const sesionesCont = box.querySelector(".f-sesiones");
+  crearFilaSesion(sesionesCont);
+  box.querySelector(".f-add-sesion").addEventListener("click", () => crearFilaSesion(sesionesCont));
+  box.querySelector(".mini-x").addEventListener("click", () => box.remove());
+  cont.appendChild(box);
+}
+
+function renderFormularioNuevoCurso(panel, btnAgregar){
+  if (document.getElementById("form-curso")) return;
+  btnAgregar.style.display = "none";
+
+  const form = document.createElement("div");
+  form.className = "form-curso";
+  form.id = "form-curso";
+  form.innerHTML = `
+    <label>Nombre del curso</label>
+    <input type="text" id="f-curso-nombre" placeholder="Ej. Proyectos XI">
+    <label>Etiqueta (Teoría, Práctica, Seminario...)</label>
+    <input type="text" id="f-curso-label" placeholder="Ej. Práctica">
+    <label>Color</label>
+    <input type="color" id="f-curso-color" value="${COLORS[Math.floor(Math.random()*COLORS.length)]}">
+    <div id="f-opciones-cont"></div>
+    <button type="button" class="btn-linea" id="f-add-opcion">+ agregar otra opción/grupo</button>
+    <div class="acciones-form">
+      <button type="button" class="btn-guardar-curso" id="f-guardar">Guardar curso</button>
+      <button type="button" class="btn-cancelar-curso" id="f-cancelar">Cancelar</button>
+    </div>
+  `;
+  panel.appendChild(form);
+
+  const opcionesCont = form.querySelector("#f-opciones-cont");
+  let contadorOpciones = 0;
+  function agregarOpcion(){ contadorOpciones++; crearFilaOpcion(opcionesCont, contadorOpciones); }
+  agregarOpcion();
+
+  form.querySelector("#f-add-opcion").addEventListener("click", agregarOpcion);
+  form.querySelector("#f-cancelar").addEventListener("click", () => {
+    form.remove();
+    btnAgregar.style.display = "block";
+  });
+
+  form.querySelector("#f-guardar").addEventListener("click", () => {
+    const nombre = form.querySelector("#f-curso-nombre").value.trim();
+    const etiqueta = form.querySelector("#f-curso-label").value.trim();
+    const color = form.querySelector("#f-curso-color").value;
+
+    if (!nombre) { alert("Ponle un nombre al curso."); return; }
+
+    const opciones = [];
+    form.querySelectorAll(".opcion-box").forEach((box, idx) => {
+      const docente = box.querySelector(".f-docente").value.trim() || "POR ASIGNAR";
+      const ambiente = box.querySelector(".f-ambiente").value.trim() || "Por confirmar";
+      const sesiones = [];
+      box.querySelectorAll(".sesion-row").forEach(row => {
+        const dia = row.querySelector(".f-dia").value;
+        const inicio = row.querySelector(".f-inicio").value;
+        const fin = row.querySelector(".f-fin").value;
+        if (inicio && fin) sesiones.push({ day: dia, start: inicio, end: fin });
+      });
+      if (sesiones.length) opciones.push({ id: String(idx+1), docente, ambiente, sessions: sesiones });
+    });
+
+    if (!opciones.length) { alert("Agrega al menos una opción con un horario válido."); return; }
+
+    const nuevoGrupo = {
+      id: "custom_" + Date.now(),
+      course: nombre,
+      label: etiqueta || "",
+      color,
+      custom: true,
+      options: opciones
+    };
+    customGroups.push(nuevoGrupo);
+    saveCustomGroups();
+    renderPanel();
+    renderSchedule();
   });
 }
 
